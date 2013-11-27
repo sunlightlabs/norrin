@@ -47,6 +47,7 @@ class Vote(Document):
         'bill_id': unicode,
         'sponsor_id': unicode,
         'voted_at': datetime,
+        'result': unicode,
         'timestamp': datetime,
         'processed': bool,
     }
@@ -93,6 +94,21 @@ class Subscriber(Document):
 
     def followed_legislators(self):
         return [f[12:] for f in self.favorites if f.startswith('/legislators')]
+
+
+@connection.register
+class Notification(Document):
+    __collection__ = 'notifications'
+    structure = {
+        'id': unicode,
+        'type': unicode,
+        'message': unicode,
+        'payload': dict,
+        'timestamp': datetime,
+    }
+    required_fields = ['id', 'type', 'message', 'timestamp']
+    default_values = {'timestamp': datetime.utcnow}
+    use_dot_notation = True
 
 
 db = connection[config.MONGODB_DATABASE]
