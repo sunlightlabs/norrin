@@ -1,56 +1,98 @@
 from datetime import datetime
+from mongokit import Connection, Document
 
-from flask.ext.mongokit import Document
+import config
+
+connection = Connection(config.MONGODB_HOST, config.MONGODB_PORT)
 
 
-class Entity(Document):
-    __collection__ = 'entities'
+@connection.register
+class Bill(Document):
+    __collection__ = 'bills'
     structure = {
-        'uuid': unicode,
-        'type': unicode,
-        'remote_id': unicode,
-        'handled': bool,
-        'creation': datetime,
-        'data': dict,
+        'bill_id': unicode,
+        'sponsor_id': unicode,
+        'introduced_on': datetime,
+        'timestamp': datetime,
+        'processed': bool,
     }
-    required_fields = ['uuid', 'type', 'remote_id', 'handled', 'creation']
-    default_values = {'handled': False}
+    required_fields = ['bill_id', 'sponsor_id', 'introduced_on']
+    default_values = {'timestamp': datetime.utcnow, 'processed': False}
     use_dot_notation = True
 
 
-class Activity(Document):
-    __collection__ = 'activities'
+@connection.register
+class BillAction(Document):
+    __collection__ = 'bill_actions'
     structure = {
-        'uuid': unicode,
-        'subscriber': unicode,
+        'bill_id': unicode,
         'type': unicode,
-        'text': unicode,
-        'creation': datetime,
-        'data': dict,
+        'acted_at': datetime,
+        'roll_id': unicode,
+        'committee_ids': list,
+        'timestamp': datetime,
+        'processed': bool,
     }
-    required_fields = ['uuid', 'subscriber', 'type', 'text', 'creation', 'data']
-    default_values = {'creation': datetime.utcnow}
+    required_fields = ['bill_id', 'type', 'acted_at']
+    default_values = {'timestamp': datetime.utcnow, 'processed': False}
     use_dot_notation = True
 
 
+@connection.register
+class Vote(Document):
+    __collection__ = 'votes'
+    structure = {
+        'roll_id': unicode,
+        'type': unicode,
+        'bill_id': unicode,
+        'sponsor_id': unicode,
+        'voted_at': datetime,
+        'timestamp': datetime,
+        'processed': bool,
+    }
+    required_fields = ['roll_id', 'type']
+    default_values = {'timestamp': datetime.utcnow, 'processed': False}
+    use_dot_notation = True
+
+
+@connection.register
+class UpcomingBill(Document):
+    __collection__ = 'upcoming_bills'
+    structure = {
+        'bill_id': unicode,
+        'sponsor_id': unicode,
+        'legislative_day': datetime,
+        'timestamp': datetime,
+        'processed': bool,
+    }
+    required_fields = ['bill_id', 'sponsor_id', 'legislative_day']
+    default_values = {'timestamp': datetime.utcnow, 'processed': False}
+    use_dot_notation = True
+
+
+@connection.register
 class Subscriber(Document):
     __collection__ = 'subscribers'
     structure = {
-        'uuid': unicode,
-        'device': unicode,
-        'timezone': unicode,
-        'notifications_enabled': bool,
-        'favorites': list,
+        'id': unicode,
+        'type': unicode,
+        'active': bool,
+        'tags': list,
+        'alias': unicode,
+        'timestamp': datetime,
     }
-    required_fields = ['uuid', 'device', 'notifications_enabled']
-    default_values = {'notifications_enabled': False}
+    required_fields = ['id', 'type', 'active']
+    default_values = {'timestamp': datetime.utcnow}
     use_dot_notation = True
 
     def followed_bills(self):
-        return [f[2:] for f in self.favorites if f.startswith('b/')]
+        return [f[7:] for f in self.favorites if f.startswith('/bills')]
 
     def followed_committees(self):
-        return [f[2:] for f in self.favorites if f.startswith('c/')]
+        return [f[12:] for f in self.favorites if f.startswith('/committees')]
 
     def followed_legislators(self):
-        return [f[2:] for f in self.favorites if f.startswith('l/')]
+        return [f[12:] for f in self.favorites if f.startswith('/legislators')]
+
+
+db = connection[config.MONGODB_DATABASE]

@@ -1,2 +1,0 @@
-# activity, roll_call
-
