@@ -39,8 +39,11 @@ class Service(object):
     # lifecycle methods
 
     def start(self):
-        logger.info('reloading subscribers')
-        self.reload_subscribers()
+        if config.AUTORELOAD_SUBSCRIBERS:
+            logger.info('autoreloading subscribers')
+            self.reload_subscribers()
+        else:
+            logger.info('skipping autoreloading subscribers')
 
     def load_data(self):
         return NotImplementedError('load_data must be implemented by the subclass')
