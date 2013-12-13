@@ -9,3 +9,4 @@ pymongo==2.6.3
 pytz==2013.7
 sunlight==1.2.1
 python-dateutil==2.2
+urbanairship==0.6.2
