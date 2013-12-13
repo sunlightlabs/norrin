@@ -7,7 +7,7 @@ from dateutil.parser import parse as parse_date
 from sunlight import congress
 
 import config
-from notifications.adapters import ConsoleAdapter, UrbanAirshipAdapter
+from notifications.adapters import ConsoleAdapter, UrbanAirshipAdapter, MongoDBAdapter
 from notifications.models import connection
 from util import day_before, yesterday, format_billid
 
@@ -17,14 +17,16 @@ airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
 ADAPTERS = [
     ConsoleAdapter(),
     # UrbanAirshipAdapter(airship),
+    MongoDBAdapter(connection[config.MONGODB_DATABASE]),
 ]
 
 
 class Notification(object):
 
-    def __init__(self, message, tags):
+    def __init__(self, type, message=None, tags=None):
+        self.type = type
         self.message = message
-        self.tags = tags
+        self.tags = tags or []
         self.context = {}
         self.scheduled_for = None
 
@@ -113,12 +115,15 @@ class BillService(Service):
             else:
                 msg = "%s sponsored %s bills" % (name, bill_count)
 
-            notification = Notification(msg, ['/legislators/%s' % sponsor_id])
+            notification = Notification('/legislator/sponsor/introduced')
+            notification.message = msg
+            notification.tags = ['/legislators/%s' % sponsor_id]
             notification.context = {
-                'type': 'legislator/sponsor/introduced',
+                'type': notification.type,
                 'legislator': sponsor_id,
                 'bills': [b['bill_id'] for b in bills],
             }
+
             self.push_notification(notification)
 
     # def finish(self):
@@ -161,7 +166,10 @@ class VoteService(Service):
 
                     msg = "%s vote on %s: %s" % (vote.type.title(), format_billid(vote.bill_id), vote.result)
 
-                    notification = Notification(msg, ['/bills/%s' % vote.bill_id])
+                    notification = Notification('/bill/vote')
+                    notification.message = msg
+                    notification.tags = ['/bills/%s' % vote.bill_id]
+
                     self.push_notification(notification)
 
                     # push = airship.create_push()
