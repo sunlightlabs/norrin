@@ -7,11 +7,26 @@ from dateutil.parser import parse as parse_date
 from sunlight import congress
 
 import config
+from notifications.adapters import ConsoleAdapter, UrbanAirshipAdapter
 from notifications.models import db
 from util import day_before, yesterday, format_billid
 
 logger = logging.getLogger('norrin.notifications')
 airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
+
+ADAPTERS = [
+    ConsoleAdapter(),
+    # UrbanAirshipAdapter(airship),
+]
+
+
+class Notification(object):
+
+    def __init__(self, message, tags):
+        self.message = message
+        self.tags = tags
+        self.context = {}
+        self.scheduled_for = None
 
 
 class Service(object):
@@ -27,6 +42,10 @@ class Service(object):
 
     def send_notifications(self):
         return NotImplementedError('send_notifications must be implemented by the subclass')
+
+    def push_notification(self, notification):
+        for adapter in ADAPTERS:
+            adapter.push(notification)
 
     def finish(self):
         pass
@@ -91,17 +110,13 @@ class BillService(Service):
             else:
                 msg = "%s sponsored %s bills" % (name, bill_count)
 
-            # context = {
-            #     'type': 'legislator/sponsor/introduced',
-            #     'legislator': sponsor_id,
-            #     'bills': [b['bill_id'] for b in bills],
-            # }
-
-            push = airship.create_push()
-            push.audience = ua.tag('/legislators/%s' % sponsor_id)
-            push.notification = ua.ios(alert=msg)
-            push.device_types = ua.all_
-            push.send()
+            notification = Notification(msg, ['/legislators/%s' % sponsor_id])
+            notification.context = {
+                'type': 'legislator/sponsor/introduced',
+                'legislator': sponsor_id,
+                'bills': [b['bill_id'] for b in bills],
+            }
+            self.push_notification(notification)
 
     # def finish(self):
     #     db.bills.update({'processed': False}, {'$set': {'processed': True}})
@@ -143,11 +158,14 @@ class VoteService(Service):
 
                     msg = "%s vote on %s: %s" % (vote.type.title(), format_billid(vote.bill_id), vote.result)
 
-                    push = airship.create_push()
-                    push.audience = ua.tag('/bills/%s' % vote.bill_id)
-                    push.notification = ua.ios(alert=msg)
-                    push.device_types = ua.all_
-                    push.send()
+                    notification = Notification(msg, ['/bills/%s' % vote.bill_id])
+                    self.push_notification(notification)
+
+                    # push = airship.create_push()
+                    # push.audience = ua.tag('/bills/%s' % vote.bill_id)
+                    # push.notification = ua.ios(alert=msg)
+                    # push.device_types = ua.all_
+                    # push.send()
 
 
 class BillActionService(Service):
