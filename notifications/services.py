@@ -99,7 +99,7 @@ class BillService(Service):
 
         sponsors = defaultdict(list)
 
-        for bill in list(db.Bill.find({'processed': False})):
+        for bill in list(self.db.Bill.find({'processed': False})):
             sponsors[bill['sponsor_id']].append(bill)
 
         for sponsor_id, bills in sponsors.items():
