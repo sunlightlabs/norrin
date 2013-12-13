@@ -109,6 +109,3 @@ class Notification(Document):
     required_fields = ['id', 'type', 'message', 'timestamp']
     default_values = {'timestamp': datetime.utcnow}
     use_dot_notation = True
-
-
-db = connection[config.MONGODB_DATABASE]

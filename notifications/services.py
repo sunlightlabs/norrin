@@ -1,4 +1,4 @@
-import datetime
+from datetime import timedelta
 import logging
 from collections import defaultdict
 
@@ -7,7 +7,7 @@ from dateutil.parser import parse as parse_date
 from sunlight import congress
 
 import config
-from notifications.models import db
+from notifications.models import connection
 from util import day_before, yesterday, format_billid
 
 logger = logging.getLogger('norrin.notifications')
@@ -15,6 +15,9 @@ airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
 
 
 class Service(object):
+
+    def __init__(self, database=None):
+        self.db = database or connection[config.MONGODB_DATABASE]
 
     # lifecycle methods
 
@@ -34,10 +37,10 @@ class Service(object):
     # action methods
 
     def reload_subscribers(self):
-        db.subscribers.remove({})
+        self.db.subscribers.remove({})
         for dt in ua.DeviceTokenList(airship):
             if dt.active:
-                subscriber = db.Subscriber()
+                subscriber = self.db.Subscriber()
                 subscriber.id = unicode(dt.id)
                 subscriber.type = unicode(dt.device_type)
                 subscriber.active = dt.active
@@ -56,14 +59,14 @@ class BillService(Service):
 
     def load_data(self):
 
-        res = db.bills.aggregate({'$group': {'_id': '', 'last': {'$max': '$introduced_on'}}})
+        res = self.db.bills.aggregate({'$group': {'_id': '', 'last': {'$max': '$introduced_on'}}})
         since = res['result'][0]['last'] if res['result'] else yesterday()
 
         count = 0
 
-        for bill in congress.bills(introduced_on__gte=since.isoformat(), fields='bill_id,sponsor_id,introduced_on', per_page=50):
-            if db.bills.find_one({'bill_id': bill['bill_id']}) is None:
-                obj = db.Bill(bill)
+        for bill in congress.bills(introduced_on__gte=since.date().isoformat(), fields='bill_id,sponsor_id,introduced_on', per_page=50):
+            if self.db.bills.find_one({'bill_id': bill['bill_id']}) is None:
+                obj = self.db.Bill(bill)
                 obj.bill_id = bill['bill_id']
                 obj.sponsor_id = bill['sponsor_id']
                 obj.introduced_on = parse_date(bill['introduced_on'])
@@ -104,23 +107,23 @@ class BillService(Service):
             push.send()
 
     # def finish(self):
-    #     db.bills.update({'processed': False}, {'$set': {'processed': True}})
+    #     self.db.bills.update({'processed': False}, {'$set': {'processed': True}})
 
 
 class VoteService(Service):
 
     def load_data(self):
 
-        res = db.votes.aggregate({'$group': {'_id': '', 'last': {'$max': '$voted_at'}}})
+        res = self.db.votes.aggregate({'$group': {'_id': '', 'last': {'$max': '$voted_at'}}})
         since = res['result'][0]['last'] if res['result'] else day_before(yesterday())
 
-        since = yesterday() - datetime.timedelta(days=16)
+        since = yesterday() - timedelta(days=16)
 
         votes = congress.votes(voted_at__gte=since.isoformat() + 'Z', fields='roll_id,vote_type,bill,voted_at,result', per_page=50)
 
         for vote in votes:
-            if db.votes.find_one({'roll_id': vote['roll_id']}) is None:
-                obj = db.Vote()
+            if self.db.votes.find_one({'roll_id': vote['roll_id']}) is None:
+                obj = self.db.Vote()
                 obj.roll_id = vote['roll_id']
                 obj.type = vote['vote_type']
                 obj.voted_at = parse_date(vote['voted_at'])
@@ -132,7 +135,7 @@ class VoteService(Service):
 
     def send_notifications(self):
 
-        votes = list(db.Vote.find({'processed': False}))
+        votes = list(self.db.Vote.find({'processed': False}))
 
         # logger.info('vote notifications for %d votes' % len(votes))
 
@@ -154,15 +157,15 @@ class BillActionService(Service):
 
     def load_data(self):
 
-        res = db.bill_actions.aggregate({'$group': {'_id': '', 'last': {'$max': '$acted_at'}}})
+        res = self.db.bill_actions.aggregate({'$group': {'_id': '', 'last': {'$max': '$acted_at'}}})
         since = res['result'][0]['last'] if res['result'] else yesterday(5)
 
         for bill in congress.bills(introduced_on__gte=since.isoformat(), fields='bill_id,actions', per_page=50):
             for action in bill['actions']:
                 action['acted_at'] = parse_date(action['acted_at'])
 
-                if db.votes.find_one({'bill_id': bill['bill_id'], 'acted_at': action['acted_at'], 'type': action['type']}) is None:
-                    obj = db.BillAction()
+                if self.db.votes.find_one({'bill_id': bill['bill_id'], 'acted_at': action['acted_at'], 'type': action['type']}) is None:
+                    obj = self.db.BillAction()
                     obj.bill_id = bill['bill_id']
                     obj.acted_at = action['acted_at']
                     obj.type = action['type']
