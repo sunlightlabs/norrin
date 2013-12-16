@@ -5,7 +5,7 @@ from mongokit import ObjectId
 from notifications.models import connection
 from notifications.services import BillService, VoteService, BillActionService
 
-import datetime
+from sunlight import congress
 from dateutil.parser import parse as parse_date
 
 TEST_DATABASE = 'norrinTests'
@@ -22,13 +22,19 @@ class TestBills(DBConnected):
 
     def setup(self):
         BillService(self.db).run()
+        if self.db.bills.count() == 0:
+            last_bills = congress.bills(order='introduced_on', fields='bill_id,sponsor_id,introduced_on', per_page=20)
+            obj = self.db.Bill()
+            obj.bill_id = 'FAKE_BILL_ID'
+            obj.sponsor_id = 'FAKE_SPONSOR_ID'
+            obj.introduced_on = data['introduced_on']
 
     @nottest
     def bill_dict(self):
         return {
             'bill_id': u's1822-113',
             'sponsor_id': u'D000563',
-            'introduced_on': parse_date(u'2013-12-12')
+            'introduced_on': u'2013-12-12'
         }
 
     @nottest
@@ -48,13 +54,13 @@ class TestBills(DBConnected):
         data = self.bill_dict()
         obj.bill_id = data['bill_id']
         obj.sponsor_id = data['sponsor_id']
-        obj.introduced_on = data['introduced_on']
+        obj.introduced_on = parse_date(data['introduced_on'])
         obj.save()
         assert isinstance(obj['_id'], ObjectId)
 
     def test_bill_update(self):
         '''Update a random bill'''
-        obj = self.db.Bill.random()
+        obj = self.db.Bill.find_random()
         obj.update(self.bill_update_dict())
         obj.save()
         assert obj.bill_id != False
