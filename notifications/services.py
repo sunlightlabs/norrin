@@ -199,6 +199,9 @@ class VoteService(Service):
                     # push.device_types = ua.all_
                     # push.send()
 
+    # def finish(self):
+    #     self.db.votes.update({'processed': False}, {'$set': {'processed': True}})
+
 
 class BillActionService(Service):
 
@@ -224,3 +227,6 @@ class BillActionService(Service):
 
     def send_notifications(self):
         pass
+
+    # def finish(self):
+    #     self.db.bill_actions.update({'processed': False}, {'$set': {'processed': True}})
