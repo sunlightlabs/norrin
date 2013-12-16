@@ -190,6 +190,10 @@ class VoteService(Service):
                     notification = Notification('/bill/vote')
                     notification.message = msg
                     notification.tags = ['/bills/%s' % vote.bill_id]
+                    notification.context = {
+                        'vote': vote.roll_id,
+                        'bill': vote.bill_id,
+                    }
 
                     self.push_notification(notification)
 
