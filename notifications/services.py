@@ -45,7 +45,7 @@ class Service(object):
         else:
             logger.info('skipping autoreloading subscribers')
 
-    def load_data(self):
+    def load_data(self, since=None):
         return NotImplementedError('load_data must be implemented by the subclass')
 
     def send_notifications(self):
@@ -81,10 +81,11 @@ class Service(object):
 
 class BillService(Service):
 
-    def load_data(self):
+    def load_data(self, since=None):
 
-        res = self.db.bills.aggregate({'$group': {'_id': '', 'last': {'$max': '$introduced_on'}}})
-        since = res['result'][0]['last'] if res['result'] else yesterday()
+        if not since:
+            res = self.db.bills.aggregate({'$group': {'_id': '', 'last': {'$max': '$introduced_on'}}})
+            since = res['result'][0]['last'] if res['result'] else yesterday()
 
         count = 0
 
@@ -135,12 +136,12 @@ class BillService(Service):
 
 class VoteService(Service):
 
-    def load_data(self):
+    def load_data(self, since=None):
 
-        res = self.db.votes.aggregate({'$group': {'_id': '', 'last': {'$max': '$voted_at'}}})
-        since = res['result'][0]['last'] if res['result'] else day_before(yesterday())
-
-        since = yesterday() - timedelta(days=16)
+        if not since:
+            res = self.db.votes.aggregate({'$group': {'_id': '', 'last': {'$max': '$voted_at'}}})
+            since = res['result'][0]['last'] if res['result'] else day_before(yesterday())
+            # since = yesterday() - timedelta(days=16)
 
         votes = congress.votes(voted_at__gte=since.isoformat() + 'Z', fields='roll_id,vote_type,bill,voted_at,result', per_page=50)
 
@@ -184,10 +185,11 @@ class VoteService(Service):
 
 class BillActionService(Service):
 
-    def load_data(self):
+    def load_data(self, since=None):
 
-        res = self.db.bill_actions.aggregate({'$group': {'_id': '', 'last': {'$max': '$acted_at'}}})
-        since = res['result'][0]['last'] if res['result'] else yesterday()
+        if not since:
+            res = self.db.bill_actions.aggregate({'$group': {'_id': '', 'last': {'$max': '$acted_at'}}})
+            since = res['result'][0]['last'] if res['result'] else yesterday()
 
         for bill in congress.bills(introduced_on__gte=since.isoformat(), fields='bill_id,actions', per_page=50):
             for action in bill['actions']:
