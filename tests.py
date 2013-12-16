@@ -21,7 +21,7 @@ class DBConnected(object):
 class TestBills(DBConnected):
 
     def setup(self):
-        BillService(self.db).load_data()
+        BillService(database=self.db).load_data()
         if self.db.bills.count() == 0:
             last_bills = congress.bills(order='introduced_on', fields='bill_id,sponsor_id,introduced_on', per_page=20)
             for bill in last_bills:
@@ -71,7 +71,7 @@ class TestBills(DBConnected):
 class TestBillActions(DBConnected):
 
     def setup(self):
-        BillActionService(self.db).load_data()
+        BillActionService(database=self.db).load_data()
 
     def test_1billactionservice(self):
         '''Test for presence of bill actions in db'''
@@ -81,7 +81,7 @@ class TestBillActions(DBConnected):
 class TestVotes(DBConnected):
 
     def setup(self):
-        VoteService(self.db).load_data()
+        VoteService(database=self.db).load_data()
 
     def test_1voteservice(self):
         '''Test for presence of votes in db'''
