@@ -5,31 +5,29 @@ from mongokit import ObjectId
 from notifications.models import connection
 from notifications.services import BillService, VoteService, BillActionService
 
-from sunlight import congress
+import config
+from util import yesterday, day_before
 from dateutil.parser import parse as parse_date
 
 TEST_DATABASE = 'norrinTests'
 
+SINCE_DATE = parse_date(config.LOAD_SINCE_DATE) if config.LOAD_SINCE_DATE else day_before(yesterday())
+
 def tearDownModule(self):
     connection.drop_database(TEST_DATABASE)
 
+
 class DBConnected(object):
-    """docstring for Base"""
+
     def __init__(self):
         self.db = connection[TEST_DATABASE]
+
 
 class TestBills(DBConnected):
 
     def setup(self):
-        BillService(database=self.db).load_data()
-        if self.db.bills.count() == 0:
-            last_bills = congress.bills(order='introduced_on', fields='bill_id,sponsor_id,introduced_on', per_page=20)
-            for bill in last_bills:
-                obj = self.db.Bill()
-                obj.bill_id = bill['bill_id']
-                obj.sponsor_id = bill['sponsor_id']
-                obj.introduced_on = parse_date(bill['introduced_on'])
-                obj.save()
+        print("Load since {0}".format(SINCE_DATE))
+        BillService(database=self.db).load_data(since=SINCE_DATE)
 
     @nottest
     def bill_dict(self):
@@ -71,7 +69,7 @@ class TestBills(DBConnected):
 class TestBillActions(DBConnected):
 
     def setup(self):
-        BillActionService(database=self.db).load_data()
+        BillActionService(database=self.db).load_data(since=SINCE_DATE)
 
     def test_1billactionservice(self):
         '''Test for presence of bill actions in db'''
@@ -81,7 +79,7 @@ class TestBillActions(DBConnected):
 class TestVotes(DBConnected):
 
     def setup(self):
-        VoteService(database=self.db).load_data()
+        VoteService(database=self.db).load_data(since=SINCE_DATE)
 
     def test_1voteservice(self):
         '''Test for presence of votes in db'''

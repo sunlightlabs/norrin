@@ -10,3 +10,6 @@ MONGODB_PORT = os.environ.get('MONGODB_PORT', 27017)
 MONGODB_DATABASE = os.environ.get('MONGODB_DATABASE', 'norrin')
 MONGODB_USERNAME = os.environ.get('MONGODB_USERNAME')
 MONGODB_PASSWORD = os.environ.get('MONGODB_PASSWORD')
+
+LOAD_SINCE_DATE = os.environ.get('LOAD_SINCE_DATE')
+
