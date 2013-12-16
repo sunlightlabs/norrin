@@ -187,7 +187,7 @@ class BillActionService(Service):
     def load_data(self):
 
         res = self.db.bill_actions.aggregate({'$group': {'_id': '', 'last': {'$max': '$acted_at'}}})
-        since = res['result'][0]['last'] if res['result'] else yesterday(5)
+        since = res['result'][0]['last'] if res['result'] else yesterday()
 
         for bill in congress.bills(introduced_on__gte=since.isoformat(), fields='bill_id,actions', per_page=50):
             for action in bill['actions']:
