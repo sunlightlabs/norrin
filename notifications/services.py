@@ -90,7 +90,7 @@ class BillService(Service):
 
         for bill in congress.bills(introduced_on__gte=since.date().isoformat(), fields='bill_id,sponsor_id,introduced_on', per_page=50):
             if self.db.bills.find_one({'bill_id': bill['bill_id']}) is None:
-                obj = self.db.Bill(bill)
+                obj = self.db.Bill()
                 obj.bill_id = bill['bill_id']
                 obj.sponsor_id = bill['sponsor_id']
                 obj.introduced_on = parse_date(bill['introduced_on'])
