@@ -24,10 +24,12 @@ class TestBills(DBConnected):
         BillService(self.db).load_data()
         if self.db.bills.count() == 0:
             last_bills = congress.bills(order='introduced_on', fields='bill_id,sponsor_id,introduced_on', per_page=20)
-            obj = self.db.Bill()
-            obj.bill_id = 'FAKE_BILL_ID'
-            obj.sponsor_id = 'FAKE_SPONSOR_ID'
-            obj.introduced_on = data['introduced_on']
+            for bill in last_bills:
+                obj = self.db.Bill()
+                obj.bill_id = bill['bill_id']
+                obj.sponsor_id = bill['sponsor_id']
+                obj.introduced_on = parse_date(bill['introduced_on'])
+                obj.save()
 
     @nottest
     def bill_dict(self):
