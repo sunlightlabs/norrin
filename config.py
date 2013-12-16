@@ -13,3 +13,4 @@ MONGODB_PASSWORD = os.environ.get('MONGODB_PASSWORD')
 
 LOAD_SINCE_DATE = os.environ.get('LOAD_SINCE_DATE')
 
+PRESERVE_TEST_DB = os.environ.get('PRESERVE_TEST_DB', False)

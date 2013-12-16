@@ -14,7 +14,8 @@ TEST_DATABASE = 'norrinTests'
 SINCE_DATE = parse_date(config.LOAD_SINCE_DATE) if config.LOAD_SINCE_DATE else day_before(yesterday())
 
 def tearDownModule(self):
-    connection.drop_database(TEST_DATABASE)
+    if not config.PRESERVE_TEST_DB:
+        connection.drop_database(TEST_DATABASE)
 
 
 class DBConnected(object):
