@@ -7,18 +7,35 @@ from dateutil.parser import parse as parse_date
 from sunlight import congress
 
 import config
-from notifications.adapters import ConsoleAdapter, UrbanAirshipAdapter, MongoDBAdapter
 from notifications.models import connection
 from util import day_before, yesterday, format_billid
 
 logger = logging.getLogger('norrin.notifications')
 airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
 
-ADAPTERS = [
-    ConsoleAdapter(),
-    # UrbanAirshipAdapter(airship),
-    MongoDBAdapter(connection[config.MONGODB_DATABASE]),
-]
+
+class AdapterRegistry(object):
+
+    def __init__(self):
+        self._adapters = []
+
+    def __iter__(self):
+        for adapter in self._adapters:
+            yield adapter
+
+    def register(self, adapter):
+        if isinstance(adapter, type):
+            adapter = adapter()
+        self._adapters.append(adapter)
+
+    def deregister(self, adapter):
+        if adapter in self._adapters:
+            self._adapters.remove(adapter)
+
+    def reset(self):
+        self._adapters[:] = []
+
+adapters = AdapterRegistry()
 
 
 class Notification(object):
@@ -52,7 +69,7 @@ class Service(object):
         return NotImplementedError('send_notifications must be implemented by the subclass')
 
     def push_notification(self, notification):
-        for adapter in ADAPTERS:
+        for adapter in adapters:
             adapter.push(notification)
 
     def finish(self):
