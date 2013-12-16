@@ -1,52 +1,86 @@
 from nose.tools import nottest
 
+from mongokit import ObjectId
+
 from notifications.models import connection
 from notifications.services import BillService, VoteService, BillActionService
-from dateutil.parser import parse as parse_date
 
-from bson.objectid import ObjectId
+import datetime
+from dateutil.parser import parse as parse_date
 
 TEST_DATABASE = 'norrinTests'
 
-class TestNorrin:
+def tearDownModule(self):
+    connection.drop_database(TEST_DATABASE)
+
+class DBConnected(object):
+    """docstring for Base"""
+    def __init__(self):
+        self.db = connection[TEST_DATABASE]
+
+class TestBills(DBConnected):
 
     def setup(self):
-        self.connection = connection
-        self.db = self.connection[TEST_DATABASE]
-
-    def teardown(self):
-        # self.connection.drop_database(self.db)
-        pass
+        BillService(self.db).run()
 
     @nottest
-    def bill_test_dict(self):
+    def bill_dict(self):
         return {
             'bill_id': u's1822-113',
             'sponsor_id': u'D000563',
-            'introduced_on': u'2013-12-12'
+            'introduced_on': parse_date(u'2013-12-12')
         }
 
+    @nottest
+    def bill_update_dict(self):
+        return {
+            'processed': True,
+            'introduced_on': parse_date(u'2010-12-12')
+        }
+
+    def test_1billservice(self):
+        '''Test for presence of bills in db'''
+        assert self.db.bills.count() > 0
+
     def test_bill(self):
+        '''Test bill creation & saving'''
         obj = self.db.Bill()
-        data = self.bill_test_dict()
+        data = self.bill_dict()
         obj.bill_id = data['bill_id']
         obj.sponsor_id = data['sponsor_id']
-        obj.introduced_on = parse_date(data['introduced_on'])
+        obj.introduced_on = data['introduced_on']
         obj.save()
         assert isinstance(obj['_id'], ObjectId)
 
     def test_bill_update(self):
-        obj = self.db.Bill(self.bill_test_dict())
+        '''Update a random bill'''
+        obj = self.db.Bill.random()
+        obj.update(self.bill_update_dict())
         obj.save()
+        assert obj.bill_id != False
 
-    def test_billservice(self):
-        BillService(database=self.db).run()
-        assert self.db.bills.count() > 0
 
-    def test_voteservice(self):
-        VoteService(database=self.db).run()
+class TestBillActions(DBConnected):
+
+    def setup(self):
+        BillActionService(self.db).run()
+
+    def test_1billactionservice(self):
+        '''Test for presence of bill actions in db'''
+        assert self.db.bill_actions.count() > 0
+
+
+class TestVotes(DBConnected):
+
+    def setup(self):
+        VoteService(self.db).run()
+
+    def test_1voteservice(self):
+        '''Test for presence of votes in db'''
         assert self.db.votes.count() > 0
 
-    def test_billactionservice(self):
-        BillActionService(database=self.db).run()
-        assert self.db.bill_actions.count() > 0
+
+# class TestUtils(object):
+
+#     def test_day_before(self):
+#         pass
