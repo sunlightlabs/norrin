@@ -10,6 +10,9 @@ from dateutil.parser import parse as parse_date
 
 TEST_DATABASE = 'norrinTests'
 
+def tearDownModule(self):
+    connection.drop_database(TEST_DATABASE)
+
 class DBConnected(object):
     """docstring for Base"""
     def __init__(self):
@@ -31,10 +34,16 @@ class TestBills(DBConnected):
     @nottest
     def bill_update_dict(self):
         return {
-            'processed': True
+            'processed': True,
+            'introduced_on': parse_date(u'2010-12-12')
         }
 
+    def test_1billservice(self):
+        '''Test for presence of bills in db'''
+        assert self.db.bills.count() > 0
+
     def test_bill(self):
+        '''Test bill creation & saving'''
         obj = self.db.Bill()
         data = self.bill_dict()
         obj.bill_id = data['bill_id']
@@ -44,13 +53,11 @@ class TestBills(DBConnected):
         assert isinstance(obj['_id'], ObjectId)
 
     def test_bill_update(self):
-        obj = self.db.Bill()
+        '''Update a random bill'''
+        obj = self.db.Bill.random()
         obj.update(self.bill_update_dict())
         obj.save()
         assert obj.bill_id != False
-
-    def test_billservice(self):
-        assert self.db.bills.count() > 0
 
 
 class TestBillActions(DBConnected):
@@ -58,7 +65,8 @@ class TestBillActions(DBConnected):
     def setup(self):
         BillActionService(self.db).run()
 
-    def test_billactionservice(self):
+    def test_1billactionservice(self):
+        '''Test for presence of bill actions in db'''
         assert self.db.bill_actions.count() > 0
 
 
@@ -67,7 +75,8 @@ class TestVotes(DBConnected):
     def setup(self):
         VoteService(self.db).run()
 
-    def test_voteservice(self):
+    def test_1voteservice(self):
+        '''Test for presence of votes in db'''
         assert self.db.votes.count() > 0
 
 
