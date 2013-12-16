@@ -2,4 +2,5 @@
 .DS_Store
 *.pyc
 celerybeat-schedule
+dev.py
 dist/
