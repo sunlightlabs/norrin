@@ -10,9 +10,8 @@ class UrbanAirshipAdapter(object):
 
         push = self.airship.create_push()
         push.audience = ua.tag(notification.tags[0])
-        push.notification = ua.ios(alert=notification.message)
-        push.device_types = ua.all_
-        push.extra = notification.context
+        push.notification = ua.notification(ios=ua.ios(alert=notification.message, extra=notification.context))
+        push.device_types = ua.device_types('ios')
 
         if notification.scheduled_for:
             schedule = self.airship.create_scheduled_push()
