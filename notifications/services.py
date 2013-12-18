@@ -215,11 +215,12 @@ class BillActionService(Service):
             res = self.db.bill_actions.aggregate({'$group': {'_id': '', 'last': {'$max': '$acted_at'}}})
             since = res['result'][0]['last'] if res['result'] else yesterday()
 
-        for bill in congress.bills(introduced_on__gte=since.isoformat(), fields='bill_id,actions', per_page=50):
+        for bill in congress.bills(last_action_at__gte=since.date().isoformat(), fields='bill_id,actions', per_page=50):
             for action in bill['actions']:
                 action['acted_at'] = parse_date(action['acted_at'])
 
                 if self.db.votes.find_one({'bill_id': bill['bill_id'], 'acted_at': action['acted_at'], 'type': action['type']}) is None:
+
                     obj = self.db.BillAction()
                     obj.bill_id = bill['bill_id']
                     obj.acted_at = action['acted_at']
@@ -230,7 +231,30 @@ class BillActionService(Service):
                     obj.save()
 
     def send_notifications(self):
-        pass
+
+        actions = list(self.db.BillAction.find({'processed': False}))
+
+        for action in actions:
+
+            if action.type in ('veto', 'enacted', 'signed'):
+
+                print action['type']
+
+                if action.type == 'veto':
+                    msg = '%s was vetoed by the President' % format_billid(action.bill_id)
+                elif action.type == 'enacted':
+                    msg = '%s was enacted into law' % format_billid(action.bill_id)
+                elif action.type == 'signed':
+                    msg = '%s was signed by the President' % format_billid(action.bill_id)
+
+                notification = Notification('/bill/action')
+                notification.message = msg
+                notification.tags = ['/bills/%s' % action.bill_id]
+                notification.context = {
+                    'vote': action.roll_id,
+                    'bill': action.bill_id,
+                    'action_type': action.type
+                }
 
     # def finish(self):
     #     self.db.bill_actions.update({'processed': False}, {'$set': {'processed': True}})
