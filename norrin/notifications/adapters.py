@@ -2,6 +2,8 @@ import logging
 
 import urbanairship as ua
 
+logger = logging.getLogger('norrin.notifications.adapters')
+
 
 class UrbanAirshipAdapter(object):
 
@@ -22,6 +24,7 @@ class UrbanAirshipAdapter(object):
             schedule.schedule = ua.scheduled_time(notification.scheduled_for)
             schedule.send()
         else:
+            logger.info("Pushing to Urban Airship")
             push.send()
 
 
@@ -36,11 +39,8 @@ class ConsoleAdapter(object):
 
 class LoggingAdapter(object):
 
-    def __init__(self):
-        self.logger = logging.getLogger('norrin.notifications.adapters')
-
     def push(self, notification):
-        self.logger.info("Notification:%s tags:%s" % (notification.message, ",".join(notification.tags)))
+        logger.info("Notification:%s tags:%s" % (notification.message, ",".join(notification.tags)))
 
 
 class MongoDBAdapter(object):
