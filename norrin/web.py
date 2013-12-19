@@ -1,5 +1,5 @@
 from flask import Flask, jsonify
-from models import db
+from norrin.notifications.models import db
 
 
 app = Flask(__name__)

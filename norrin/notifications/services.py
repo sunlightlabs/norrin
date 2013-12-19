@@ -1,14 +1,14 @@
-from datetime import timedelta
 import logging
+from datetime import timedelta
 from collections import defaultdict
 
 import urbanairship as ua
 from dateutil.parser import parse as parse_date
 from sunlight import congress
 
-import config
-from notifications.models import connection
-from util import day_before, yesterday, format_billid
+from norrin import config
+from norrin.notifications.models import connection
+from norrin.util import day_before, yesterday, format_billid
 
 logger = logging.getLogger('norrin.notifications')
 airship = ua.Airship(config.UA_KEY, config.UA_MASTER)

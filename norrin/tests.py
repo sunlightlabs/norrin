@@ -2,8 +2,8 @@ from nose.tools import nottest
 
 from mongokit import ObjectId
 
-from notifications.models import connection
-from notifications.services import BillService, VoteService, BillActionService
+from norrin.notifications.models import connection
+from norrin.notifications.services import BillService, VoteService, BillActionService
 
 from sunlight import congress
 from dateutil.parser import parse as parse_date

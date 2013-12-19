@@ -1,7 +1,7 @@
 from datetime import datetime
 from mongokit import Connection, Document
 
-import config
+from norrin import config
 
 connection = Connection(config.MONGODB_HOST, config.MONGODB_PORT)
 

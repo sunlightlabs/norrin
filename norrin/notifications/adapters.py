@@ -1,3 +1,5 @@
+import logging
+
 import urbanairship as ua
 
 
@@ -30,6 +32,15 @@ class ConsoleAdapter(object):
         print "        tags: %s" % ", ".join(notification.tags)
         if notification.scheduled_for:
             print "   scheduled: %s" % notification.scheduled_for
+
+
+class LoggingAdapter(object):
+
+    def __init__(self):
+        self.logger = logging.getLogger('norrin.notifications.adapters')
+
+    def push(self, notification):
+        self.logger.info("Notification:%s tags:%s" % (notification.message, ",".join(notification.tags)))
 
 
 class MongoDBAdapter(object):
