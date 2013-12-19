@@ -26,7 +26,8 @@ class AdapterRegistry(object):
     def register(self, adapter):
         if isinstance(adapter, type):
             adapter = adapter()
-        self._adapters.append(adapter)
+        if adapter not in self._adapters:
+            self._adapters.append(adapter)
 
     def deregister(self, adapter):
         if adapter in self._adapters:
