@@ -1,5 +1,6 @@
 .env
 .DS_Store
+*.log
 *.pyc
 celerybeat-schedule
 dev.py
