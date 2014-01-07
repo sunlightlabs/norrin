@@ -154,8 +154,8 @@ class BillService(Service):
 
             self.push_notification(notification)
 
-    # def finish(self):
-    #     self.db.bills.update({'processed': False}, {'$set': {'processed': True}})
+    def finish(self):
+        self.db.bills.update({'processed': False}, {'$set': {'processed': True}}, multi=True)
 
 
 class VoteService(Service):
@@ -212,7 +212,7 @@ class VoteService(Service):
                     # push.send()
 
     # def finish(self):
-    #     self.db.votes.update({'processed': False}, {'$set': {'processed': True}})
+    #     self.db.votes.update({'processed': False}, {'$set': {'processed': True}}, multi=True)
 
 
 class BillActionService(Service):
@@ -266,4 +266,4 @@ class BillActionService(Service):
                 }
 
     # def finish(self):
-    #     self.db.bill_actions.update({'processed': False}, {'$set': {'processed': True}})
+    #     self.db.bill_actions.update({'processed': False}, {'$set': {'processed': True}}, multi=True)
