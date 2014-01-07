@@ -4,7 +4,8 @@ from mongokit import Connection, Document
 from norrin import config
 
 connection = Connection(config.MONGODB_HOST, config.MONGODB_PORT)
-connection[config.MONGODB_DATABASE].authenticate(config.MONGODB_USERNAME, config.MONGODB_PASSWORD)
+if config.MONGODB_USERNAME and config.MONGODB_PASSWORD:
+    connection[config.MONGODB_DATABASE].authenticate(config.MONGODB_USERNAME, config.MONGODB_PASSWORD)
 
 @connection.register
 class Bill(Document):
