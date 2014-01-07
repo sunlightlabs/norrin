@@ -14,7 +14,7 @@ celery.config_from_object('celeryconfig')
 airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
 
 adapters.register(UrbanAirshipAdapter(airship))
-# adapters.register(ConsoleAdapter)
+adapters.register(ConsoleAdapter)
 adapters.register(LoggingAdapter)
 
 
