@@ -132,6 +132,7 @@ class BillService(Service):
             name = "%s. %s %s" % (sponsor['title'], sponsor['first_name'], sponsor['last_name'])
 
             bill_count = len(bills)
+
             if bill_count == 1:
                 msg = "%s sponsored a bill" % name
             else:
@@ -145,6 +146,11 @@ class BillService(Service):
                 'legislator': sponsor_id,
                 'bills': [b['bill_id'] for b in bills],
             }
+
+            if bill_count == 1:
+                notification.context['app_url'] = '/bills/%s' % bills[0]['bill_id']
+            else:
+                notification.context['app_url'] = '/legislators/%s' % sponsor_id
 
             self.push_notification(notification)
 
@@ -193,6 +199,7 @@ class VoteService(Service):
                     notification.tags = ['/bills/%s' % vote.bill_id]
                     notification.context = {
                         'vote': vote.roll_id,
+                        'app_url': '/bills/%s' % vote.bill_id,
                         'bill': vote.bill_id,
                     }
 
@@ -252,6 +259,7 @@ class BillActionService(Service):
                 notification.message = msg
                 notification.tags = ['/bills/%s' % action.bill_id]
                 notification.context = {
+                    'app_url': '/bills/%s' % action.bill_id,
                     'vote': action.roll_id,
                     'bill': action.bill_id,
                     'action_type': action.type
