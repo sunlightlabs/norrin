@@ -17,4 +17,8 @@ CELERYBEAT_SCHEDULE = {
         'task': 'norrin.notifications.tasks.run_bill_action_service',
         'schedule': crontab(hour='*', minute="30"), # every hour, 30 minutes in
     },
+    'upcoming_bill_service': {
+        'task': 'norrin.notifications.tasks.run_upcoming_bill_service',
+        'schedule': crontab(hour='*', minute="15"), # every hour, 30 minutes in
+    },
 }
