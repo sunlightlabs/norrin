@@ -64,10 +64,11 @@ class UpcomingBill(Document):
         'bill_id': unicode,
         'sponsor_id': unicode,
         'legislative_day': datetime,
+        'range': unicode,
         'timestamp': datetime,
         'processed': bool,
     }
-    required_fields = ['bill_id', 'sponsor_id', 'legislative_day']
+    required_fields = ['bill_id', 'legislative_day']
     default_values = {'timestamp': datetime.utcnow, 'processed': False}
     use_dot_notation = True
 

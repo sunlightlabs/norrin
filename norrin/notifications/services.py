@@ -1,5 +1,5 @@
+import datetime
 import logging
-from datetime import timedelta
 from collections import defaultdict
 
 import urbanairship as ua
@@ -165,7 +165,6 @@ class VoteService(Service):
         if not since:
             res = self.db.votes.aggregate({'$group': {'_id': '', 'last': {'$max': '$voted_at'}}})
             since = res['result'][0]['last'] if res['result'] else day_before(yesterday())
-            # since = yesterday() - timedelta(days=16)
 
         votes = congress.votes(voted_at__gte=since.isoformat() + 'Z', fields='roll_id,vote_type,bill,voted_at,result', per_page=50)
 
@@ -204,12 +203,6 @@ class VoteService(Service):
                     }
 
                     self.push_notification(notification)
-
-                    # push = airship.create_push()
-                    # push.audience = ua.tag('/bills/%s' % vote.bill_id)
-                    # push.notification = ua.ios(alert=msg)
-                    # push.device_types = ua.all_
-                    # push.send()
 
     def finish(self):
         self.db.votes.update({'processed': False}, {'$set': {'processed': True}}, multi=True)
@@ -265,5 +258,51 @@ class BillActionService(Service):
                     'action_type': action.type
                 }
 
+                self.push_notification(notification)
+
     def finish(self):
         self.db.bill_actions.update({'processed': False}, {'$set': {'processed': True}}, multi=True)
+
+
+class UpcomingBillService(Service):
+
+    def load_data(self, since=None):
+
+        if not since:
+            res = self.db.upcoming_bills.aggregate({'$group': {'_id': '', 'last': {'$max': '$legislative_day'}}})
+            since = res['result'][0]['last'] if res['result'] else yesterday()
+
+        for bill in congress.upcoming_bills(legislative_day__gte=since.date().isoformat(), fields='bill_id,legislative_day,range', per_page=50):
+            if bill['legislative_day']:
+                bill['legislative_day'] = parse_date(bill['legislative_day'])
+                if self.db.upcoming_bills.find_one({'bill_id': bill['bill_id'], 'legislative_day': bill['legislative_day']}) is None:
+                    obj = self.db.UpcomingBill()
+                    obj.bill_id = bill['bill_id']
+                    obj.legislative_day = bill['legislative_day']
+                    obj.range = bill['range']
+                    obj.save()
+
+    def send_notifications(self):
+        today = datetime.datetime.combine(datetime.date.today(), datetime.time(0, 0, 0, 0))
+        bills = list(self.db.UpcomingBill.find({'processed': False, 'legislative_day': today}))
+
+        for bill in bills:
+
+            if bill['range'] == 'day':
+                msg = '%s is scheduled for a vote today' % format_billid(bill.bill_id)
+            elif bill['range'] == 'week':
+                msg = '%s is scheduled for a vote this week' % format_billid(bill.bill_id)
+
+            notification = Notification('/bill/upcoming')
+            notification.message = msg
+            notification.tags = ['/bills/%s' % bill.bill_id]
+            notification.context = {
+                'app_url': '/bills/%s' % bill.bill_id,
+                'bill': bill.bill_id,
+                'legislative_day': today.date().isoformat(),
+            }
+
+            self.push_notification(notification)
+
+    def finish(self):
+        self.db.upcoming_bills.update({'processed': False}, {'$set': {'processed': True}}, multi=True)
