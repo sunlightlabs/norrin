@@ -5,6 +5,7 @@ from collections import defaultdict
 import urbanairship as ua
 from dateutil.parser import parse as parse_date
 from sunlight import congress
+from raven import Client as Raven
 
 from norrin import config
 from norrin.notifications.models import connection
@@ -53,6 +54,7 @@ class Service(object):
 
     def __init__(self, database=None):
         self.db = database or connection[config.MONGODB_DATABASE]
+        self.sentry = Raven(config.SENTRY_DSN)
 
     # lifecycle methods
 
@@ -71,7 +73,10 @@ class Service(object):
 
     def push_notification(self, notification):
         for adapter in adapters:
-            adapter.push(notification)
+            try:
+                adapter.push(notification)
+            except:
+                self.sentry.captureException()
 
     def finish(self):
         pass
@@ -91,10 +96,13 @@ class Service(object):
                 subscriber.save()
 
     def run(self):
-        self.start()
-        self.load_data()
-        self.send_notifications()
-        self.finish()
+        try:
+            self.start()
+            self.load_data()
+            self.send_notifications()
+            self.finish()
+        except:
+            self.sentry.captureException()
 
 
 class BillService(Service):

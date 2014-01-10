@@ -6,6 +6,8 @@ UA_SECRET = os.environ.get('UA_SECRET')
 UA_MASTER = os.environ.get('UA_MASTER')
 AUTORELOAD_SUBSCRIBERS = os.environ.get('AUTORELOAD_SUBSCRIBERS', False)
 
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+
 mongohq_url = os.environ.get('MONGOHQ_URL')
 
 if mongohq_url:
