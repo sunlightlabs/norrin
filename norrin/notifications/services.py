@@ -158,7 +158,7 @@ class BillService(Service):
             if bill_count == 1:
                 notification.context['app_url'] = '/bills/%s' % bills[0]['bill_id']
             else:
-                notification.context['app_url'] = '/legislators/%s' % sponsor_id
+                notification.context['app_url'] = '/legislators/%s/sponsored' % sponsor_id
 
             self.push_notification(notification)
 
@@ -206,7 +206,7 @@ class VoteService(Service):
                     notification.tags = ['/bills/%s' % vote.bill_id]
                     notification.context = {
                         'vote': vote.roll_id,
-                        'app_url': '/bills/%s' % vote.bill_id,
+                        'app_url': '/bills/%s/activity' % vote.bill_id,
                         'bill': vote.bill_id,
                     }
 
@@ -260,7 +260,7 @@ class BillActionService(Service):
                 notification.message = msg
                 notification.tags = ['/bills/%s' % action.bill_id]
                 notification.context = {
-                    'app_url': '/bills/%s' % action.bill_id,
+                    'app_url': '/bills/%s/activity' % action.bill_id,
                     'vote': action.roll_id,
                     'bill': action.bill_id,
                     'action_type': action.type
