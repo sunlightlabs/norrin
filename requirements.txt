@@ -1,6 +1,5 @@
 celery==3.1.6
-Flask==0.10.1
-Flask-MongoKit==0.6
+Django==1.6.1
 itsdangerous==0.23
 Jinja2==2.7.1
 MarkupSafe==0.18
