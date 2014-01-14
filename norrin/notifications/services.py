@@ -7,8 +7,8 @@ from dateutil.parser import parse as parse_date
 from sunlight import congress
 from raven import Client as Raven
 
-from norrin import config
-from norrin.notifications.models import connection
+from . import config
+from .models import connection
 from norrin.util import day_before, yesterday, format_billid
 
 logger = logging.getLogger('norrin.notifications')

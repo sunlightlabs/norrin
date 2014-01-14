@@ -3,7 +3,7 @@ import urbanairship as ua
 from celery import Celery
 from celery.utils.log import get_task_logger
 
-from norrin import config
+from . import config
 from .services import BillService, BillActionService, UpcomingBillService, VoteService, adapters
 from .adapters import UrbanAirshipAdapter, ConsoleAdapter, LoggingAdapter
 

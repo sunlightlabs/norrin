@@ -1,7 +1,7 @@
 from datetime import datetime
 from mongokit import Connection, Document
 
-from norrin import config
+from norrin.notifications import config
 
 connection = Connection(config.MONGODB_HOST, config.MONGODB_PORT)
 if config.MONGODB_USERNAME and config.MONGODB_PASSWORD:
