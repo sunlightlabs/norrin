@@ -29,7 +29,7 @@ class Client(models.Model):
 class Configuration(models.Model):
     key = models.CharField(max_length=32, default=generate_key)
     description = models.TextField()
-    payload = JSONField()
+    payload = JSONField(blank=True, null=True)
     enabled = models.BooleanField(default=False)
     created = models.DateTimeField(default=utcnow)
 
