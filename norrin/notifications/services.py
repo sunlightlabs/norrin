@@ -228,7 +228,7 @@ class BillActionService(Service):
             for action in bill['actions']:
                 action['acted_at'] = parse_date(action['acted_at'])
 
-                if self.db.votes.find_one({'bill_id': bill['bill_id'], 'acted_at': action['acted_at'], 'type': action['type']}) is None:
+                if self.db.bill_actions.find_one({'bill_id': bill['bill_id'], 'acted_at': action['acted_at'], 'type': action['type']}) is None:
 
                     obj = self.db.BillAction()
                     obj.bill_id = bill['bill_id']
