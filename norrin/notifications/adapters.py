@@ -1,4 +1,5 @@
 import logging
+import uuid
 
 import urbanairship as ua
 
@@ -49,7 +50,16 @@ class MongoDBAdapter(object):
         self.db = db
 
     def push(self, notification):
-        pass
+        obj = self.db.Notification()
+        obj.id = unicode(uuid.uuid4().hex)
+        obj.type = unicode(notification.type)
+        obj.message = unicode(notification.message)
+        obj.payload = {
+            'tags': notification.tags,
+            'context': notification.context,
+            'scheduled_for': notification.scheduled_for,
+        }
+        obj.save()
 
 
 class EmailAdapter(object):
