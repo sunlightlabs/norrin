@@ -1,4 +1,6 @@
 import datetime
+import logging
+
 import urbanairship as ua
 from celery import Celery
 from celery.utils.log import get_task_logger
@@ -9,6 +11,7 @@ from .models import connection
 from .services import BillService, BillActionService, UpcomingBillService, VoteService, adapters
 
 logger = get_task_logger(__name__)
+logger.setLevel(logging.INFO)
 
 celery = Celery('norrin.notifications.tasks')
 celery.config_from_object('celeryconfig')
@@ -17,8 +20,7 @@ airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
 
 adapters.register(UrbanAirshipAdapter(airship))
 adapters.register(MongoDBAdapter(connection[config.MONGODB_DATABASE]))
-# adapters.register(ConsoleAdapter)
-# adapters.register(LoggingAdapter)
+adapters.register(LoggingAdapter)
 
 
 def nowstr():
