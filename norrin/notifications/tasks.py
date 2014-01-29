@@ -28,13 +28,13 @@ def nowstr():
 
 @celery.task
 def run_bill_service():
-    logger.debug('running BillService at %s' % nowstr())
+    logger.info('running BillService at %s' % nowstr())
     BillService().run()
 
 
 @celery.task
 def run_bill_action_service():
-    logger.debug('running BillActionService at %s' % nowstr())
+    logger.info('running BillActionService at %s' % nowstr())
     BillActionService().run()
 
 
