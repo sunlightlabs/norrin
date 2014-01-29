@@ -54,7 +54,7 @@ class Service(object):
 
     def __init__(self, database=None):
         self.db = database or connection[config.MONGODB_DATABASE]
-        self.sentry = Raven(config.SENTRY_DSN)
+        self.sentry = Raven(config.SENTRY_DSN) if config.SENTRY_DSN else None
 
     # lifecycle methods
 
@@ -76,7 +76,8 @@ class Service(object):
             try:
                 adapter.push(notification)
             except:
-                self.sentry.captureException()
+                if self.sentry:
+                    self.sentry.captureException()
 
     def finish(self):
         pass
@@ -102,7 +103,8 @@ class Service(object):
             self.send_notifications()
             self.finish()
         except:
-            self.sentry.captureException()
+            if self.sentry:
+                self.sentry.captureException()
 
 
 class BillService(Service):
