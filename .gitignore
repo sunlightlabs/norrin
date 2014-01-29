@@ -6,3 +6,4 @@ celerybeat-schedule
 dev.py
 dist/
 staticfiles
+!staticfiles/.info
