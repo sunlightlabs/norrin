@@ -1,0 +1,82 @@
+{% extends "notifications/base.html" %}
+{% load norrin_tags %}
+
+{% block css %}
+	<style>
+		.notification {
+			background: #452A19 url(http://cngr.es.s3.amazonaws.com/mini-icon.png) 1em 1em no-repeat;
+			border-radius: 8px;
+			color: #FFFBF1;
+			font-size: 110%;
+			line-height: 160%;
+			margin: 2em auto;
+			padding: 0.8em 1em 0.8em 3.5em;
+			width: 380px;
+		}
+		.notification p {
+			font-weight: 200;
+			letter-spacing: 0.5px;
+			margin: 0;
+			padding: 0;
+		}
+		.notification .app-title { font-weight: 500; }
+		.notification time {
+			color: #836658;
+			display: inline-block;
+			font-size: 80%;
+			margin-left: 20px;
+		}
+	</style>
+{% endblock %}
+
+{% block content %}
+    <h2>Notification {{ notification.id }}</h2>
+
+    <div class="notification">
+    	<p>
+    		<span class="app-title">Congress</span>
+    		<time>
+    			{% if notification.payload.schedule_for %}
+			        {{ notification.payload.schedule_for }}
+			    {% else %}
+			        {{ notification.timestamp }}
+			    {% endif %}
+			</time>
+		</p>
+    	<p>{{ notification.message }}</p>
+    </div>
+
+    <dl class="dl-horizontal">
+
+    	<dt>Type</dt>
+    	<dd>{{ notification.type }}</dd>
+
+    	<dt>Created</dt>
+    	<dd>{{ notification.timestamp }}</dd>
+
+    	<dt>Scheduled for</dt>
+    	<dd>
+    		{% if notification.payload.schedule_for %}
+		        {{ notification.payload.schedule_for }}
+		    {% else %}
+		        Immediate
+		    {% endif %}
+    	</dd>
+
+    	<dt>Tags</dt>
+    	<dd>
+    		<ul class="list-unstyled">
+		        {% for tag in notification.payload.tags %}
+		            <li>{{ tag }}</li>
+		        {% endfor %}
+		    </ul>
+    	</dd>
+
+    	<dt>Payload</dt>
+    	<dd>
+    		<pre><code>{{ notification.payload.context|pprint }}</code></pre>
+    	</dd>
+
+    </dl>
+
+{% endblock %}

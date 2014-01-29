@@ -6,4 +6,5 @@ admin.autodiscover()
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     url(r'^config/', include('norrin.appconfig.urls')),
+    url(r'^notifications/', include('norrin.notifications.urls')),
 )

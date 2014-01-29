@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'raven.contrib.django.raven_compat',
     'south',
     'norrin.appconfig',
+    'norrin.notifications',
 )
 
 MIDDLEWARE_CLASSES = (
