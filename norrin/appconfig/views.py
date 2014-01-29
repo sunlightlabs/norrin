@@ -22,7 +22,7 @@ class JSONResponse(HttpResponse):
 
 class PlistResponse(HttpResponse):
     def __init__(self, payload):
-        content = plistlib.writePlistToString(payload)
+        content = plistlib.writePlistToString(payload or '')
         super(PlistResponse, self).__init__(content, content_type=EXTENSIONS['plist'])
 
 
