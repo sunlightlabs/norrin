@@ -154,7 +154,6 @@ class BillService(Service):
             notification.context = {
                 'type': notification.type,
                 'legislator': sponsor_id,
-                'bills': [b['bill_id'] for b in bills],
             }
 
             if bill_count == 1:
