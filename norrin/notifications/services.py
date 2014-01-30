@@ -302,6 +302,8 @@ class UpcomingBillService(Service):
                 msg = '%s is scheduled for a vote today' % format_billid(bill.bill_id)
             elif bill['range'] == 'week':
                 msg = '%s is scheduled for a vote this week' % format_billid(bill.bill_id)
+            else:
+                msg = '%s is scheduled for a vote' % format_billid(bill.bill_id)
 
             notification = Notification('/bill/upcoming')
             notification.message = msg
