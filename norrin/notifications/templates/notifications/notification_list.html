@@ -1,8 +1,13 @@
 {% extends "notifications/base.html" %}
 
+{% block css %}
+    <style>
+        .paginator .next { float: right; }
+    </style>
+{% endblock %}
+
 {% block content %}
-    <h1>Dashboard</h1>
-    <h2>Recent Notifications</h2>
+    <h1>Notifications</h1>
     <table class="table table-striped">
         <thead>
             <tr>
@@ -13,7 +18,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for notification in recent_notifications %}
+            {% for notification in notifications %}
                 <tr>
                     <td><a href="{% url 'notification_detail' notification.id %}">{{ notification.id|slice:":8" }}...</a></td>
                     <td>{{ notification.type }}</td>
@@ -23,5 +28,12 @@
             {% endfor %}
         </tbody>
     </table>
-    <p><a href="/notifications/all/">View all</a></p>
+    <div class="paginator">
+        {% if pages.previous_page %}
+            <a href="?page={{ pages.previous_page }}" class="btn btn-primary previous"><i class="glyphicon glyphicon-chevron-left"></i> Previous</a>
+        {% endif %}
+        {% if pages.next_page %}
+            <a href="?page={{ pages.next_page }}" class="btn btn-primary next">Next <i class="glyphicon glyphicon-chevron-right"></i></a>
+        {% endif %}
+    </div>
 {% endblock %}
