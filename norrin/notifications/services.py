@@ -250,8 +250,6 @@ class BillActionService(Service):
 
             if action.type in ('veto', 'enacted', 'signed'):
 
-                print action['type']
-
                 if action.type == 'veto':
                     msg = '%s was vetoed by the President' % format_billid(action.bill_id)
                 elif action.type == 'enacted':
@@ -283,10 +281,15 @@ class UpcomingBillService(Service):
             res = self.db.upcoming_bills.aggregate({'$group': {'_id': '', 'last': {'$max': '$legislative_day'}}})
             since = res['result'][0]['last'] if res['result'] else yesterday()
 
-        for bill in congress.upcoming_bills(legislative_day__gte=since.date().isoformat(), fields='bill_id,legislative_day,range', per_page=200):
+        for bill in congress.upcoming_bills(legislative_day__gte=since.date().isoformat(), fields='bill_id,legislative_day,range,chamber', per_page=200):
             if bill['legislative_day']:
                 bill['legislative_day'] = parse_date(bill['legislative_day'])
-                if self.db.upcoming_bills.find_one({'bill_id': bill['bill_id'], 'legislative_day': bill['legislative_day']}) is None:
+                spec = {
+                    'bill_id': bill['bill_id'],
+                    'legislative_day': bill['legislative_day'],
+                    'chamber': bill['chamber']
+                }
+                if self.db.upcoming_bills.find_one() is None:
                     obj = self.db.UpcomingBill()
                     obj.bill_id = bill['bill_id']
                     obj.legislative_day = bill['legislative_day']
@@ -301,13 +304,14 @@ class UpcomingBillService(Service):
         for bill in bills:
 
             bill_id = format_billid(bill.bill_id)
+            chamber = bill.chamber.title()
 
             if bill['range'] == 'day':
-                msg = '%s is scheduled for a vote today in the %s' % (bill_id, bill.chamber)
+                msg = '%s is scheduled for a vote today in the %s' % (bill_id, chamber)
             elif bill['range'] == 'week':
-                msg = '%s is scheduled for a vote this week in the %s' % (bill_id, bill.chamber)
+                msg = '%s is scheduled for a vote this week in the %s' % (bill_id, chamber)
             else:
-                msg = '%s is scheduled for a vote in the %s' % (bill_id, bill.chamber)
+                msg = '%s is scheduled for a vote in the %s' % (bill_id, chamber)
 
             notification = Notification('/bill/upcoming')
             notification.message = msg
