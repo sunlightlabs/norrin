@@ -289,7 +289,7 @@ class UpcomingBillService(Service):
                     'legislative_day': bill['legislative_day'],
                     'chamber': bill['chamber']
                 }
-                if self.db.upcoming_bills.find_one() is None:
+                if self.db.upcoming_bills.find_one(spec) is None:
                     obj = self.db.UpcomingBill()
                     obj.bill_id = bill['bill_id']
                     obj.legislative_day = bill['legislative_day']
