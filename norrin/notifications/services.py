@@ -5,6 +5,7 @@ from collections import defaultdict
 import urbanairship as ua
 from dateutil.parser import parse as parse_date
 from sunlight import congress
+from sunlight.pagination import PagingService
 from raven import Client as Raven
 
 from . import config
@@ -14,6 +15,7 @@ from norrin.util import day_before, yesterday, format_billid
 logger = logging.getLogger('norrin.notifications')
 airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
 
+congress = PagingService(congress)
 
 class AdapterRegistry(object):
 
@@ -117,7 +119,7 @@ class BillService(Service):
 
         count = 0
 
-        for bill in congress.bills(introduced_on__gte=since.date().isoformat(), fields='bill_id,sponsor_id,introduced_on', per_page=50):
+        for bill in congress.bills(introduced_on__gte=since.date().isoformat(), fields='bill_id,sponsor_id,introduced_on', per_page=200):
             if self.db.bills.find_one({'bill_id': bill['bill_id']}) is None:
                 obj = self.db.Bill()
                 obj.bill_id = bill['bill_id']
@@ -175,7 +177,7 @@ class VoteService(Service):
             res = self.db.votes.aggregate({'$group': {'_id': '', 'last': {'$max': '$voted_at'}}})
             since = res['result'][0]['last'] if res['result'] else day_before(yesterday())
 
-        votes = congress.votes(voted_at__gte=since.isoformat() + 'Z', fields='roll_id,vote_type,bill,voted_at,result', per_page=50)
+        votes = congress.votes(voted_at__gte=since.isoformat() + 'Z', fields='roll_id,vote_type,bill,voted_at,result', per_page=200)
 
         for vote in votes:
             if self.db.votes.find_one({'roll_id': vote['roll_id']}) is None:
@@ -225,7 +227,7 @@ class BillActionService(Service):
             res = self.db.bill_actions.aggregate({'$group': {'_id': '', 'last': {'$max': '$acted_at'}}})
             since = res['result'][0]['last'] if res['result'] else yesterday()
 
-        for bill in congress.bills(last_action_at__gte=since.date().isoformat(), fields='bill_id,actions', per_page=50):
+        for bill in congress.bills(last_action_at__gte=since.date().isoformat(), fields='bill_id,actions', per_page=200):
             for action in bill['actions']:
                 action['acted_at'] = parse_date(action['acted_at'])
 
@@ -281,7 +283,7 @@ class UpcomingBillService(Service):
             res = self.db.upcoming_bills.aggregate({'$group': {'_id': '', 'last': {'$max': '$legislative_day'}}})
             since = res['result'][0]['last'] if res['result'] else yesterday()
 
-        for bill in congress.upcoming_bills(legislative_day__gte=since.date().isoformat(), fields='bill_id,legislative_day,range', per_page=50):
+        for bill in congress.upcoming_bills(legislative_day__gte=since.date().isoformat(), fields='bill_id,legislative_day,range', per_page=200):
             if bill['legislative_day']:
                 bill['legislative_day'] = parse_date(bill['legislative_day'])
                 if self.db.upcoming_bills.find_one({'bill_id': bill['bill_id'], 'legislative_day': bill['legislative_day']}) is None:
