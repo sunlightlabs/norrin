@@ -152,7 +152,7 @@ class BillService(Service):
 
             notification = Notification('/legislator/sponsor/introduced')
             notification.message = msg
-            notification.tags = ['/legislators/%s' % sponsor_id]
+            notification.tags = ['/legislator/sponsor/introduction', '/legislators/%s' % sponsor_id]
             notification.context = {
                 'type': notification.type,
                 'legislator': sponsor_id,
@@ -206,7 +206,7 @@ class VoteService(Service):
 
                     notification = Notification('/bill/vote')
                     notification.message = msg
-                    notification.tags = ['/bills/%s' % vote.bill_id]
+                    notification.tags = ['/bill/vote', '/bills/%s' % vote.bill_id]
                     notification.context = {
                         'vote': vote.roll_id,
                         'app_url': '/bills/%s/activity' % vote.bill_id,
@@ -261,7 +261,7 @@ class BillActionService(Service):
 
                 notification = Notification('/bill/action')
                 notification.message = msg
-                notification.tags = ['/bills/%s' % action.bill_id]
+                notification.tags = ['/bill/action', '/bills/%s' % action.bill_id]
                 notification.context = {
                     'app_url': '/bills/%s/activity' % action.bill_id,
                     'vote': action.roll_id,
@@ -308,7 +308,7 @@ class UpcomingBillService(Service):
 
             notification = Notification('/bill/upcoming')
             notification.message = msg
-            notification.tags = ['/bills/%s' % bill.bill_id]
+            notification.tags = ['/bill/upcoming', '/bills/%s' % bill.bill_id]
             notification.context = {
                 'app_url': '/bills/%s' % bill.bill_id,
                 'bill': bill.bill_id,
