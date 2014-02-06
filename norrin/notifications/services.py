@@ -291,6 +291,7 @@ class UpcomingBillService(Service):
                     obj.bill_id = bill['bill_id']
                     obj.legislative_day = bill['legislative_day']
                     obj.range = bill['range']
+                    obj.chamber = bill['chamber']
                     obj.save()
 
     def send_notifications(self):
@@ -299,12 +300,14 @@ class UpcomingBillService(Service):
 
         for bill in bills:
 
+            bill_id = format_billid(bill.bill_id)
+
             if bill['range'] == 'day':
-                msg = '%s is scheduled for a vote today' % format_billid(bill.bill_id)
+                msg = '%s is scheduled for a vote today in the %s' % (bill_id, bill.chamber)
             elif bill['range'] == 'week':
-                msg = '%s is scheduled for a vote this week' % format_billid(bill.bill_id)
+                msg = '%s is scheduled for a vote this week in the %s' % (bill_id, bill.chamber)
             else:
-                msg = '%s is scheduled for a vote' % format_billid(bill.bill_id)
+                msg = '%s is scheduled for a vote in the %s' % (bill_id, bill.chamber)
 
             notification = Notification('/bill/upcoming')
             notification.message = msg

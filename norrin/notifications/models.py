@@ -65,6 +65,7 @@ class UpcomingBill(Document):
         'sponsor_id': unicode,
         'legislative_day': datetime,
         'range': unicode,
+        'chamber': unicode,
         'timestamp': datetime,
         'processed': bool,
     }
