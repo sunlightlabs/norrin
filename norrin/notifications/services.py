@@ -1,5 +1,8 @@
+from __future__ import unicode_literals
+
 import datetime
 import logging
+import uuid
 from collections import defaultdict
 
 import urbanairship as ua
@@ -42,16 +45,6 @@ class AdapterRegistry(object):
 adapters = AdapterRegistry()
 
 
-class Notification(object):
-
-    def __init__(self, type, message=None, tags=None):
-        self.type = type
-        self.message = message
-        self.tags = tags or []
-        self.context = {}
-        self.scheduled_for = None
-
-
 class Service(object):
 
     def __init__(self, database=None):
@@ -77,9 +70,14 @@ class Service(object):
         for adapter in adapters:
             try:
                 adapter.push(notification)
-            except:
+            except Exception as e:
                 if self.sentry:
                     self.sentry.captureException()
+                notification.errors.append({
+                    'timestamp': datetime.datetime.utcnow(),
+                    'message': str(e),
+                })
+        notification.save()
 
     def finish(self):
         pass
@@ -104,9 +102,11 @@ class Service(object):
             self.load_data()
             self.send_notifications()
             self.finish()
-        except:
+        except Exception as e:
             if self.sentry:
                 self.sentry.captureException()
+            else:
+                raise
 
 
 class BillService(Service):
@@ -140,7 +140,7 @@ class BillService(Service):
 
         for sponsor_id, bills in sponsors.items():
 
-            sponsor = congress.legislators(bioguide_id=sponsor_id)[0]
+            sponsor = congress.legislators(bioguide_id=sponsor_id).next()
             name = "%s. %s %s" % (sponsor['title'], sponsor['first_name'], sponsor['last_name'])
 
             bill_count = len(bills)
@@ -150,18 +150,19 @@ class BillService(Service):
             else:
                 msg = "%s sponsored %s bills" % (name, bill_count)
 
-            notification = Notification('/legislator/sponsor/introduced')
+            notification = self.db.Notification()
+            notification.type = '/legislator/sponsor/introduced'
             notification.message = msg
-            notification.tags = ['/legislator/sponsor/introduction', '/legislators/%s' % sponsor_id]
-            notification.context = {
+            notification.tags = {'and': ['/legislator/sponsor/introduction', '/legislators/%s' % sponsor_id]}
+            notification.payload = {
                 'type': notification.type,
                 'legislator': sponsor_id,
             }
 
             if bill_count == 1:
-                notification.context['app_url'] = '/bills/%s' % bills[0]['bill_id']
+                notification.payload['app_url'] = '/bills/%s' % bills[0]['bill_id']
             else:
-                notification.context['app_url'] = '/legislators/%s/sponsored' % sponsor_id
+                notification.payload['app_url'] = '/legislators/%s/sponsored' % sponsor_id
 
             self.push_notification(notification)
 
@@ -204,10 +205,11 @@ class VoteService(Service):
 
                     msg = "%s vote on %s: %s" % (vote.type.title(), format_billid(vote.bill_id), vote.result)
 
-                    notification = Notification('/bill/vote')
+                    notification = self.db.Notification()
+                    notification.type = '/bill/vote'
                     notification.message = msg
-                    notification.tags = ['/bill/vote', '/bills/%s' % vote.bill_id]
-                    notification.context = {
+                    notification.tags = {'and': ['/bill/vote', '/bills/%s' % vote.bill_id]}
+                    notification.payload = {
                         'vote': vote.roll_id,
                         'app_url': '/bills/%s/activity' % vote.bill_id,
                         'bill': vote.bill_id,
@@ -257,10 +259,11 @@ class BillActionService(Service):
                 elif action.type == 'signed':
                     msg = '%s was signed by the President' % format_billid(action.bill_id)
 
-                notification = Notification('/bill/action')
+                notification = self.db.Notification()
+                notification.type = '/bill/action'
                 notification.message = msg
-                notification.tags = ['/bill/action', '/bills/%s' % action.bill_id]
-                notification.context = {
+                notification.tags = {'and': ['/bill/action', '/bills/%s' % action.bill_id]}
+                notification.payload = {
                     'app_url': '/bills/%s/activity' % action.bill_id,
                     'vote': action.roll_id,
                     'bill': action.bill_id,
@@ -317,15 +320,16 @@ class UpcomingBillService(Service):
             else:
                 msg = '%s is scheduled for a vote in the %s' % (bill_id, chamber)
 
-            notification = Notification('/bill/upcoming')
+            notification = self.db.Notification()
+            notification.type = '/bill/upcoming'
             notification.message = msg
             notification.tags = {
                 'or': [
-                    ['/bill/upcoming', '/bills/%s' % bill.bill_id],
-                    ['/legislator/sponsor/upcoming', '/legislators/%s' % bill.sponsor_id],
+                    {'and': ['/bill/upcoming', '/bills/%s' % bill.bill_id]},
+                    {'and': ['/legislator/sponsor/upcoming', '/legislators/%s' % bill.sponsor_id]},
                 ]
             }
-            notification.context = {
+            notification.payload = {
                 'app_url': '/bills/%s' % bill.bill_id,
                 'bill': bill.bill_id,
                 'legislative_day': today.date().isoformat(),

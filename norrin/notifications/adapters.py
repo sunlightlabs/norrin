@@ -1,5 +1,4 @@
 import logging
-import uuid
 
 import urbanairship as ua
 
@@ -13,10 +12,9 @@ class UrbanAirshipAdapter(object):
 
     def push(self, notification):
 
-
         push = self.airship.create_push()
         push.audience = self.make_tags(notification.tags)
-        push.notification = ua.notification(ios=ua.ios(alert=notification.message, extra=notification.context))
+        push.notification = ua.notification(ios=ua.ios(alert=notification.message, extra=notification.payload))
         push.device_types = ua.device_types('ios')
 
         if notification.scheduled_for:
@@ -29,12 +27,16 @@ class UrbanAirshipAdapter(object):
             logger.info("Pushing to Urban Airship")
             push.send()
 
+        notification.sent = True
+
     def make_tags(self, val):
         if isinstance(val, list):
             return ua.and_(*[self.make_tags(v) for v in val])
         elif isinstance(val, dict):
             if 'or' in val:
                 return ua.or_(*[self.make_tags(v) for v in val['or']])
+            elif 'and' in val:
+                return ua.and_(*[self.make_tags(v) for v in val['and']])
         else:
             return ua.tag(val)
 
@@ -44,7 +46,7 @@ class ConsoleAdapter(object):
 
     def push(self, notification):
         print "Notification: %s" % notification.message
-        print "        tags: %s" % ", ".join(notification.tags)
+        print "        tags: %s" % notification.tags
         if notification.scheduled_for:
             print "   scheduled: %s" % notification.scheduled_for
 
@@ -62,12 +64,12 @@ class MongoDBAdapter(object):
 
     def push(self, notification):
         obj = self.db.Notification()
-        obj.id = unicode(uuid.uuid4().hex)
+        obj.id = unicode(notification.id)
         obj.type = unicode(notification.type)
         obj.message = unicode(notification.message)
         obj.payload = {
             'tags': notification.tags,
-            'context': notification.context,
+            'payload': notification.payload,
             'scheduled_for': notification.scheduled_for,
         }
         obj.save()

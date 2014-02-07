@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 from mongokit import Connection, Document
 
@@ -99,6 +100,9 @@ class Subscriber(Document):
         return [f[12:] for f in self.favorites if f.startswith('/legislators')]
 
 
+def new_id():
+    return unicode(uuid.uuid4().hex[:12])
+
 @connection.register
 class Notification(Document):
     __collection__ = 'notifications'
@@ -106,9 +110,14 @@ class Notification(Document):
         'id': unicode,
         'type': unicode,
         'message': unicode,
+        'tags': dict,
         'payload': dict,
+        'meta': dict,
+        'scheduled_for': datetime,
         'timestamp': datetime,
+        'sent': bool,
+        'errors': list,
     }
     required_fields = ['id', 'type', 'message', 'timestamp']
-    default_values = {'timestamp': datetime.utcnow}
+    default_values = {'id': new_id, 'sent': False, 'errors': list, 'timestamp': datetime.utcnow}
     use_dot_notation = True
