@@ -283,6 +283,9 @@ class UpcomingBillService(Service):
 
         for bill in congress.upcoming_bills(legislative_day__gte=since.date().isoformat(), fields='bill_id,legislative_day,range,chamber', per_page=200):
             if bill['legislative_day']:
+
+                sponsor_id = list(congress.bills(bill_id=bill['bill_id'], fields='sponsor_id'))[0]['sponsor_id']
+
                 bill['legislative_day'] = parse_date(bill['legislative_day'])
                 spec = {
                     'bill_id': bill['bill_id'],
@@ -293,6 +296,7 @@ class UpcomingBillService(Service):
                     obj = self.db.UpcomingBill()
                     obj.bill_id = bill['bill_id']
                     obj.legislative_day = bill['legislative_day']
+                    obj.sponsor_id = sponsor_id
                     obj.range = bill['range']
                     obj.chamber = bill['chamber']
                     obj.save()
@@ -315,7 +319,12 @@ class UpcomingBillService(Service):
 
             notification = Notification('/bill/upcoming')
             notification.message = msg
-            notification.tags = ['/bill/upcoming', '/bills/%s' % bill.bill_id]
+            notification.tags = {
+                'or': [
+                    ['/bill/upcoming', '/bills/%s' % bill.bill_id],
+                    ['/legislator/sponsor/upcoming', '/legislators/%s' % bill.sponsor_id],
+                ]
+            }
             notification.context = {
                 'app_url': '/bills/%s' % bill.bill_id,
                 'bill': bill.bill_id,

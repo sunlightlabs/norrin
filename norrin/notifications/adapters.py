@@ -13,8 +13,9 @@ class UrbanAirshipAdapter(object):
 
     def push(self, notification):
 
+
         push = self.airship.create_push()
-        push.audience = ua.tag(notification.tags[0])
+        push.audience = self.make_tags(notification.tags)
         push.notification = ua.notification(ios=ua.ios(alert=notification.message, extra=notification.context))
         push.device_types = ua.device_types('ios')
 
@@ -27,6 +28,16 @@ class UrbanAirshipAdapter(object):
         else:
             logger.info("Pushing to Urban Airship")
             push.send()
+
+    def make_tags(self, val):
+        if isinstance(val, list):
+            return ua.and_(*[self.make_tags(v) for v in val])
+        elif isinstance(val, dict):
+            if 'or' in val:
+                return ua.or_(*[self.make_tags(v) for v in val['or']])
+        else:
+            return ua.tag(val)
+
 
 
 class ConsoleAdapter(object):
