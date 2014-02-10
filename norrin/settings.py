@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'googleauth',
     'raven.contrib.django.raven_compat',
     'south',
     'norrin.appconfig',
@@ -96,7 +97,19 @@ STATIC_URL = '/static/'
 
 # other stuff
 
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
 RAVEN_CONFIG = {
     'dsn': os.environ.get('SENTRY_DSN'),
 }
 
+GOOGLEAUTH_DOMAIN = 'sunlightfoundation.com'
+
+LOGIN_URL = '/login/'
+LOGOUT_URL = '/logout/'
+LOGIN_REDIRECT_URL = '/notifications/status/'
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'googleauth.backends.GoogleAuthBackend',
+)

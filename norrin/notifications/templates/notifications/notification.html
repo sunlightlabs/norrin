@@ -11,11 +11,12 @@
 			line-height: 160%;
 			margin: 0 auto 2em;
 			padding: 0.8em 1em 0.8em 3.5em;
-			width: 380px;
+			width: 100%;
 		}
 		.notification p {
 			font-weight: 200;
 			letter-spacing: 0.5px;
+			line-height: 120%;
 			margin: 0;
 			padding: 0;
 		}
@@ -34,7 +35,7 @@
     <h1>{{ notification.message }}</h1>
 
     <div class="row" style="margin: 3em 0;">
-    	<div class="col-md-7">
+    	<div class="col-md-5 col-md-push-7">
 		    {% if notification.sent and notification.errors %}
 		    	<div class="alert alert-warning"><strong>Important:</strong> Notification was sent, but errors occurred.</div>
 		    {% elif notification.errors %}
@@ -44,6 +45,21 @@
 		    {% else %}
 		    	<div class="alert alert-info"><strong>Important:</strong> Notification is pending.</div>
 		    {% endif %}
+		    <div class="notification">
+		    	<p>
+		    		<span class="app-title">Congress</span>
+		    		<time>
+		    			{% if notification.payload.schedule_for %}
+					        {{ notification.payload.schedule_for|naturaltime }}
+					    {% else %}
+					        {{ notification.timestamp|naturaltime }}
+					    {% endif %}
+					</time>
+				</p>
+		    	<p>{{ notification.message }}</p>
+		    </div>
+    	</div>
+    	<div class="col-md-7 col-md-pull-5">
 		    <dl class="dl-horizontal">
 
 		    	<dt>ID</dt>
@@ -97,21 +113,6 @@
 		    		{% endfor %}
 		    	</table>
 		    {% endif %}
-    	</div>
-    	<div class="col-md-5">
-		    <div class="notification">
-		    	<p>
-		    		<span class="app-title">Congress</span>
-		    		<time>
-		    			{% if notification.payload.schedule_for %}
-					        {{ notification.payload.schedule_for }}
-					    {% else %}
-					        {{ notification.timestamp }}
-					    {% endif %}
-					</time>
-				</p>
-		    	<p>{{ notification.message }}</p>
-		    </div>
     	</div>
     </div>
 
