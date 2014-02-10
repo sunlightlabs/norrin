@@ -25,4 +25,4 @@ six==1.5.2
 static==0.4
 sunlight>=1.2.4
 urbanairship==0.6.2
--e git+git@github.com:jcarbaugh/django-googleauth.git#egg=googleauth
+-e git+https://github.com/jcarbaugh/django-googleauth.git#egg=googleauth
