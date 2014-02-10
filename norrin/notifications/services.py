@@ -294,7 +294,7 @@ class UpcomingBillService(Service):
                 spec = {
                     'bill_id': bill['bill_id'],
                     'legislative_day': bill['legislative_day'],
-                    'chamber': bill['chamber']
+                    'chamber': bill.get('chamber')
                 }
                 if self.db.upcoming_bills.find_one(spec) is None:
                     obj = self.db.UpcomingBill()
@@ -302,7 +302,7 @@ class UpcomingBillService(Service):
                     obj.legislative_day = bill['legislative_day']
                     obj.sponsor_id = sponsor_id
                     obj.range = bill['range']
-                    obj.chamber = bill['chamber']
+                    obj.chamber = bill.get('chamber')
                     obj.save()
 
     def send_notifications(self):
