@@ -9,7 +9,7 @@
 			color: #FFFBF1;
 			font-size: 110%;
 			line-height: 160%;
-			margin: 2em auto;
+			margin: 0 auto 2em;
 			padding: 0.8em 1em 0.8em 3.5em;
 			width: 380px;
 		}
@@ -31,54 +31,88 @@
 
 {% block content %}
 
-    <h1>Notification</h1>
-    <h2>{{ notification.id }}</h2>
+    <h1>{{ notification.message }}</h1>
 
-    <div class="notification">
-    	<p>
-    		<span class="app-title">Congress</span>
-    		<time>
-    			{% if notification.payload.schedule_for %}
-			        {{ notification.payload.schedule_for }}
-			    {% else %}
-			        {{ notification.timestamp }}
-			    {% endif %}
-			</time>
-		</p>
-    	<p>{{ notification.message }}</p>
-    </div>
-
-    <dl class="dl-horizontal">
-
-    	<dt>Type</dt>
-    	<dd>{{ notification.type }}</dd>
-
-    	<dt>Created</dt>
-    	<dd>{{ notification.timestamp }}</dd>
-
-    	<dt>Scheduled for</dt>
-    	<dd>
-    		{% if notification.payload.schedule_for %}
-		        {{ notification.payload.schedule_for }}
+    <div class="row" style="margin: 3em 0;">
+    	<div class="col-md-7">
+		    {% if notification.sent and notification.errors %}
+		    	<div class="alert alert-warning"><strong>Important:</strong> Notification was sent, but errors occurred.</div>
+		    {% elif notification.errors %}
+		    	<div class="alert alert-danger"><strong>Fatal:</strong> Errors prevented the notification from being sent.</div>
+		    {% elif notification.sent %}
+		    	<div class="alert alert-success"><strong>Success:</strong> Notification has been sent.</div>
 		    {% else %}
-		        Immediate
+		    	<div class="alert alert-info"><strong>Important:</strong> Notification is pending.</div>
 		    {% endif %}
-    	</dd>
+		    <dl class="dl-horizontal">
 
-    	<dt>Tags</dt>
-    	<dd>
-    		<ul class="list-unstyled">
-		        {% for tag in notification.payload.tags %}
-		            <li>{{ tag }}</li>
-		        {% endfor %}
-		    </ul>
-    	</dd>
+		    	<dt>ID</dt>
+		    	<dd>{{ notification.id }}</dd>
 
-    	<dt>Payload</dt>
-    	<dd>
-    		<pre><code>{{ notification.payload.context|pprint }}</code></pre>
-    	</dd>
+		    	<dt>Type</dt>
+		    	<dd>{{ notification.type }}</dd>
 
-    </dl>
+		    	<dt>Created</dt>
+		    	<dd>{{ notification.timestamp }}</dd>
+
+		    	<dt>Scheduled for</dt>
+		    	<dd>
+		    		{% if notification.payload.schedule_for %}
+				        {{ notification.payload.schedule_for }}
+				    {% else %}
+				        Immediate
+				    {% endif %}
+		    	</dd>
+
+		    	<dt>Tags</dt>
+		    	<dd>
+		    		<pre><code>{{ notification.tags|pprint }}</code></pre>
+		    	</dd>
+
+		    	<dt>Payload</dt>
+		    	<dd>
+		    		<pre><code>{{ notification.payload|pprint }}</code></pre>
+		    	</dd>
+
+		    	<dt>Meta</dt>
+		    	<dd>
+		    		<pre><code>{{ notification.meta|pprint }}</code></pre>
+		    		<p><small>Meta content is not sent to the notification service.</small></p>
+		    	</dd>
+
+		    </dl>
+
+		    {% if notification.errors %}
+		    	<h3>Errors</h3>
+		    	<table class="table">
+		    		<tr>
+		    			<th>Timestamp</th>
+		    			<th>Message</th>
+		    		</tr>
+		    		{% for error in notification.errors %}
+		    			<tr>
+		    				<td>{{ error.timestamp }}</td>
+		    				<td>{{ error.message }}</td>
+		    			</tr>
+		    		{% endfor %}
+		    	</table>
+		    {% endif %}
+    	</div>
+    	<div class="col-md-5">
+		    <div class="notification">
+		    	<p>
+		    		<span class="app-title">Congress</span>
+		    		<time>
+		    			{% if notification.payload.schedule_for %}
+					        {{ notification.payload.schedule_for }}
+					    {% else %}
+					        {{ notification.timestamp }}
+					    {% endif %}
+					</time>
+				</p>
+		    	<p>{{ notification.message }}</p>
+		    </div>
+    	</div>
+    </div>
 
 {% endblock %}

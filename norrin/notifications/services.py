@@ -67,6 +67,7 @@ class Service(object):
         return NotImplementedError('send_notifications must be implemented by the subclass')
 
     def push_notification(self, notification):
+        notification.save()
         for adapter in adapters:
             try:
                 adapter.push(notification)
@@ -96,10 +97,10 @@ class Service(object):
                 subscriber.alias = unicode(dt.alias) if dt.alias else None
                 subscriber.save()
 
-    def run(self):
+    def run(self, since=None):
         try:
             self.start()
-            self.load_data()
+            self.load_data(since)
             self.send_notifications()
             self.finish()
         except Exception as e:

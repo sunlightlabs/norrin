@@ -19,7 +19,6 @@ celery.config_from_object('celeryconfig')
 airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
 
 adapters.register(UrbanAirshipAdapter(airship))
-adapters.register(MongoDBAdapter(connection[config.MONGODB_DATABASE]))
 adapters.register(LoggingAdapter)
 
 

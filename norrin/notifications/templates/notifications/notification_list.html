@@ -15,6 +15,7 @@
                 <th>Type</th>
                 <th>Message</th>
                 <th>Timestamp</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
@@ -24,6 +25,21 @@
                     <td>{{ notification.type }}</td>
                     <td>{{ notification.message }}</td>
                     <td>{{ notification.timestamp }}</td>
+                    <td>
+                    	{% if notification.sent %}
+                    		{% if notification.errors %}
+								<span class="label label-warning">Sent with errors</span>
+							{% else %}
+                    			<span class="label label-success">Sent</span>
+                    		{% endif %}
+                    	{% else %}
+                    		{% if notification.errors %}
+                    			<span class="label label-danger">Errors</span>
+                    		{% else %}
+                    			<span class="label label-info">Pending</span>
+                    		{% endif %}
+                    	{% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>
