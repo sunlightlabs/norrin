@@ -50,10 +50,12 @@ class Service(object):
     def __init__(self, database=None):
         self.db = database or connection[config.MONGODB_DATABASE]
         self.sentry = Raven(config.SENTRY_DSN) if config.SENTRY_DSN else None
+        self.notifications_sent = 0
 
     # lifecycle methods
 
     def start(self):
+        self.notifications_sent = 0
         if config.AUTORELOAD_SUBSCRIBERS:
             logger.info('autoreloading subscribers')
             self.reload_subscribers()
@@ -79,6 +81,7 @@ class Service(object):
                     'message': str(e),
                 })
         notification.save()
+        self.notifications_sent += 1
 
     def finish(self):
         pass
