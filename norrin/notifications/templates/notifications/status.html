@@ -2,42 +2,59 @@
 
 {% block content %}
     <h1>Dashboard</h1>
-    <h2>Recent Notifications</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Type</th>
-                <th>Message</th>
-                <th>Timestamp</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for notification in recent_notifications %}
-                <tr>
-                    <td><a href="{% url 'notification_detail' notification.id %}">{{ notification.id|slice:":8" }}...</a></td>
-                    <td>{{ notification.type }}</td>
-                    <td>{{ notification.message }}</td>
-                    <td>{{ notification.timestamp }}</td>
-                    <td>
-                    	{% if notification.sent %}
-                    		{% if notification.errors %}
-								<span class="label label-warning">Sent with errors</span>
-							{% else %}
-                    			<span class="label label-success">Sent</span>
-                    		{% endif %}
-                    	{% else %}
-                    		{% if notification.errors %}
-                    			<span class="label label-danger">Errors</span>
-                    		{% else %}
-                    			<span class="label label-info">Pending</span>
-                    		{% endif %}
-                    	{% endif %}
-                    </td>
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p><a href="/notifications/all/">View all</a></p>
+    <div class="row">
+    	<div class="col-md-8">
+		    <h2>Recent Notifications</h2>
+		    <table class="table table-striped">
+		        <thead>
+		            <tr>
+		                <th>Message</th>
+		                <th>Timestamp</th>
+		                <th>Status</th>
+		            </tr>
+		        </thead>
+		        <tbody>
+		            {% for notification in recent_notifications %}
+		                <tr>
+		                    <td><a href="{% url 'notification_detail' notification.id %}">{{ notification.message }}</a></td>
+		                    <td>{{ notification.timestamp|date:"N n H:i" }}</td>
+		                    <td>
+		                    	{% if notification.sent %}
+		                    		{% if notification.errors %}
+										<span class="label label-warning">Sent with errors</span>
+									{% else %}
+		                    			<span class="label label-success">Sent</span>
+		                    		{% endif %}
+		                    	{% else %}
+		                    		{% if notification.errors %}
+		                    			<span class="label label-danger">Errors</span>
+		                    		{% else %}
+		                    			<span class="label label-info">Pending</span>
+		                    		{% endif %}
+		                    	{% endif %}
+		                    </td>
+		                </tr>
+		            {% endfor %}
+		        </tbody>
+		    </table>
+    		<p><a href="{% url 'notification_list' %}">View all</a></p>
+    	</div>
+    	<div class="col-md-4">
+    		<h2>System Status</h2>
+			<div class="panel panel-default">
+				<div class="panel-heading">Notifications</div>
+					<ul class="list-group">
+					<li class="list-group-item">
+						{% if config.notifications_enabled == 'on' %}
+    						Currently enabled
+    						<a class="btn btn-xs btn-primary" style="float: right;" href="{% url 'notification_power' %}">Disable</a>
+						{% else %}
+    						<strong class="text-danger">Currently disabled</strong>
+    						<a class="btn btn-xs btn-primary" style="float: right;" href="{% url 'notification_power' %}">Enable</a>
+						{% endif %}
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
 {% endblock %}

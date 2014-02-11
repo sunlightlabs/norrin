@@ -1,24 +1,24 @@
 import math
 
+from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.views.generic import View
 from mongokit import Connection
 
-from norrin.notifications import config
-from norrin.notifications.models import Notification
+from norrin import config
+from norrin import settings
+from norrin.notifications.models import connection, Notification
 
 
-conn = Connection(config.MONGODB_HOST, config.MONGODB_PORT)
-db = conn[config.MONGODB_DATABASE]
-if config.MONGODB_USERNAME and config.MONGODB_PASSWORD:
-    db.authenticate(config.MONGODB_USERNAME, config.MONGODB_PASSWORD)
+conn = Connection(settings.MONGODB_HOST, settings.MONGODB_PORT)
+db = conn[settings.MONGODB_DATABASE]
 
 
 class StatusView(View):
 
     def get(self, request, *args, **kwargs):
         context = {
-            'recent_notifications': [n for n in db.notifications.find({}).limit(5).sort("timestamp", -1)],
+            'recent_notifications': [n for n in db.notifications.find({}).limit(5).sort("timestamp", -1)]
         }
         return render(request, 'notifications/status.html', context)
 
@@ -58,3 +58,15 @@ class NotificationListView(View):
         }
 
         return render(request, 'notifications/notification_list.html', context)
+
+
+class PowerView(View):
+
+    def get(self, request, *args, **kwargs):
+        return render(request, 'notifications/power.html')
+
+    def post(self, request, *args, **kwargs):
+        status = request.POST.get('status')
+        if status in ('on', 'off'):
+            config.set(config.SERVICES_ENABLED, status)
+        return HttpResponseRedirect('/notifications/power/')

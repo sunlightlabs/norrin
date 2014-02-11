@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 import datetime
 import logging
+import urlparse
 import uuid
 from collections import defaultdict
 
@@ -11,12 +12,12 @@ from sunlight import congress
 from sunlight.pagination import PagingService
 from raven import Client as Raven
 
-from . import config
 from .models import connection
+from norrin import settings
 from norrin.util import day_before, yesterday, format_billid
 
 logger = logging.getLogger('norrin.notifications')
-airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
+airship = ua.Airship(settings.UA_KEY, settings.UA_MASTER)
 
 congress = PagingService(congress)
 
@@ -48,15 +49,15 @@ adapters = AdapterRegistry()
 class Service(object):
 
     def __init__(self, database=None):
-        self.db = database or connection[config.MONGODB_DATABASE]
-        self.sentry = Raven(config.SENTRY_DSN) if config.SENTRY_DSN else None
+        self.db = database or connection[settings.MONGODB_DATABASE]
+        self.sentry = Raven(settings.SENTRY_DSN) if settings.SENTRY_DSN else None
         self.notifications_sent = 0
 
     # lifecycle methods
 
     def start(self):
         self.notifications_sent = 0
-        if config.AUTORELOAD_SUBSCRIBERS:
+        if settings.AUTORELOAD_SUBSCRIBERS:
             logger.info('autoreloading subscribers')
             self.reload_subscribers()
         else:

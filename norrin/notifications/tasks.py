@@ -5,7 +5,7 @@ import urbanairship as ua
 from celery import Celery
 from celery.utils.log import get_task_logger
 
-from . import config
+from norrin import settings
 from .adapters import UrbanAirshipAdapter, ConsoleAdapter, LoggingAdapter, MongoDBAdapter
 from .models import connection
 from .services import BillService, BillActionService, UpcomingBillService, VoteService, adapters
@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 celery = Celery('norrin.notifications.tasks')
 celery.config_from_object('celeryconfig')
 
-airship = ua.Airship(config.UA_KEY, config.UA_MASTER)
+airship = ua.Airship(settings.UA_KEY, settings.UA_MASTER)
 
 adapters.register(UrbanAirshipAdapter(airship))
 adapters.register(LoggingAdapter)

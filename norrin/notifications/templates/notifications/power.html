@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Notifications</h1>
+    <p>Disabling notifications prevents new notifications from being processed. When disabled, notifications will still be loaded and queued for sending.</p>
+    <form class="form" action="{% url 'notification_power' %}" method="post">
+        {% csrf_token %}
+        {% if config.notifications_enabled == 'on' %}
+            <input type="hidden" name="status" value="off">
+            <button type="submit" class="btn btn-lg btn-danger">Disable Notifications</button>
+        {% else %}
+            <input type="hidden" name="status" value="on">
+            <button type="submit" class="btn btn-lg btn-success">Enable Notifications</button>
+        {% endif %}
+    </form>
+{% endblock %}

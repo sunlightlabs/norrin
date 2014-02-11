@@ -2,11 +2,11 @@ import uuid
 from datetime import datetime
 from mongokit import Connection, Document
 
-from norrin.notifications import config
+from norrin import settings
 
-connection = Connection(config.MONGODB_HOST, config.MONGODB_PORT)
-if config.MONGODB_USERNAME and config.MONGODB_PASSWORD:
-    connection[config.MONGODB_DATABASE].authenticate(config.MONGODB_USERNAME, config.MONGODB_PASSWORD)
+connection = Connection(settings.MONGOHQ_URL)
+if settings.MONGODB_USERNAME and settings.MONGODB_PASSWORD:
+    connection[settings.MONGODB_DATABASE].authenticate(settings.MONGODB_USERNAME, settings.MONGODB_PASSWORD)
 
 @connection.register
 class Bill(Document):

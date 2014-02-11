@@ -1,15 +1,7 @@
-"""
-Django settings for norrin project.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/1.6/topics/settings/
-
-For the full list of settings and their values, see
-https://docs.djangoproject.com/en/1.6/ref/settings/
-"""
+import os
+import urlparse
 
 import dj_database_url
-import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -57,6 +49,17 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    'django.contrib.auth.context_processors.auth',
+    'django.core.context_processors.debug',
+    'django.core.context_processors.i18n',
+    'django.core.context_processors.media',
+    'django.core.context_processors.static',
+    'django.core.context_processors.tz',
+    'django.contrib.messages.context_processors.messages',
+    'norrin.context_processors.norrin_config',
+)
+
 ROOT_URLCONF = 'norrin.urls'
 
 WSGI_APPLICATION = 'norrin.wsgi.application'
@@ -71,16 +74,11 @@ DATABASES = {
 }
 
 # Internationalization
-# https://docs.djangoproject.com/en/1.6/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 
@@ -95,13 +93,8 @@ STATIC_URL = '/static/'
 #     os.path.join(BASE_DIR, 'static'),
 # )
 
-# other stuff
 
-SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
-
-RAVEN_CONFIG = {
-    'dsn': os.environ.get('SENTRY_DSN'),
-}
+# authentication
 
 GOOGLEAUTH_DOMAIN = 'sunlightfoundation.com'
 
@@ -113,3 +106,37 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'googleauth.backends.GoogleAuthBackend',
 )
+
+
+# Urban Airship
+
+UA_KEY = os.environ.get('UA_KEY')
+UA_SECRET = os.environ.get('UA_SECRET')
+UA_MASTER = os.environ.get('UA_MASTER')
+
+
+# MongoDB
+
+MONGOHQ_URL = os.environ.get('MONGOHQ_URL', 'mongodb://localhost:27017/norrin')
+
+o = urlparse.urlparse(MONGOHQ_URL)
+
+MONGODB_HOST = o.hostname or 'localhost'
+MONGODB_PORT = o.port or 27017
+MONGODB_USERNAME = o.username or None
+MONGODB_PASSWORD = o.password or None
+MONGODB_DATABASE = o.path.strip('/') or None
+
+
+# other stuff
+
+SESSION_SERIALIZER = 'django.contrib.sessions.serializers.PickleSerializer'
+
+SENTRY_DSN = os.environ.get('SENTRY_DSN')
+RAVEN_CONFIG = {
+    'dsn': SENTRY_DSN,
+}
+
+REDISCLOUD_URL = os.environ.get('REDISCLOUD_URL', 'redis://localhost:6379')
+
+AUTORELOAD_SUBSCRIBERS = os.environ.get('AUTORELOAD_SUBSCRIBERS', False)
