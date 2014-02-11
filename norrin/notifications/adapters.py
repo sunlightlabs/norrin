@@ -22,11 +22,12 @@ class UrbanAirshipAdapter(object):
             schedule.push = push
             schedule.name = notification.type
             schedule.schedule = ua.scheduled_time(notification.scheduled_for)
-            schedule.send()
+            resp = schedule.send()
         else:
             logger.info("Pushing to Urban Airship")
-            push.send()
+            resp = push.send()
 
+        notification.meta['ua_response'] = resp.payload
         notification.sent = True
 
     def make_tags(self, val):
