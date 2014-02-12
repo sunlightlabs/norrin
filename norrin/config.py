@@ -12,9 +12,7 @@ conn = redis.Redis(host=url.hostname, port=url.port, password=url.password)
 
 def get(k, default=None):
     v = conn.get(k)
-    print "GET %s:%s" % (k, v)
     return default if v is None else v
 
 def set(k, v):
-    resp = conn.set(k, v)
-    print "SET %s:%s = %s" % (k, v, resp)
+    conn.set(k, v)

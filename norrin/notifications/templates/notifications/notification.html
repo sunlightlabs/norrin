@@ -39,11 +39,17 @@
 		    {% if notification.sent and notification.errors %}
 		    	<div class="alert alert-warning"><strong>Important:</strong> Notification was sent, but errors occurred.</div>
 		    {% elif notification.errors %}
-		    	<div class="alert alert-danger"><strong>Fatal:</strong> Errors prevented the notification from being sent.</div>
+		    	<div class="alert alert-danger">
+		    		<a href="#" class="btn btn-xs btn-primary send-trigger" style="float: right;">Resend now</a>
+		    		<p><strong>Fatal:</strong> Errors prevented the notification from being sent.</p>
+		    	</div>
 		    {% elif notification.sent %}
 		    	<div class="alert alert-success"><strong>Success:</strong> Notification has been sent.</div>
 		    {% else %}
-		    	<div class="alert alert-info"><strong>Important:</strong> Notification is pending.</div>
+		    	<div class="alert alert-info">
+		    		<a href="#" class="btn btn-xs btn-primary send-trigger" style="float: right;">Send now</a>
+		    		<p><strong>Important:</strong> Notification is pending.</p>
+		    	</div>
 		    {% endif %}
 		    <div class="notification">
 		    	<p>
@@ -116,4 +122,16 @@
     	</div>
     </div>
 
+{% endblock %}
+
+{% block js %}
+	<script>
+		$(document).ready(function() {
+			$('a.send-trigger').click(function(ev) {
+				ev.preventDefault();
+				$.post('{% url 'notification_send' notification.id %}');
+				$(this).text('Sent').attr('disabled', 'disabled');
+			});
+		});
+	</script>
 {% endblock %}

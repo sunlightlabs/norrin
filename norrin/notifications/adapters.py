@@ -1,6 +1,7 @@
 import logging
 
 import urbanairship as ua
+from norrin import config
 
 logger = logging.getLogger('norrin.notifications.adapters')
 
@@ -11,6 +12,10 @@ class UrbanAirshipAdapter(object):
         self.airship = airship
 
     def push(self, notification):
+
+        if not config.get(config.SERVICES_ENABLED, 'off') == 'on':
+            logger.info('notifications disabled: %s marked as pending' % notification.id)
+            return
 
         push = self.airship.create_push()
         push.audience = self.make_tags(notification.tags)
