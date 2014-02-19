@@ -257,17 +257,20 @@ class BillActionService(Service):
 
             if action.type in ('veto', 'enacted', 'signed'):
 
+                tags = {'and': ['/bill/action', '/bills/%s' % action.bill_id]}
+
                 if action.type == 'veto':
                     msg = '%s was vetoed by the President' % format_billid(action.bill_id)
                 elif action.type == 'enacted':
                     msg = '%s was enacted into law' % format_billid(action.bill_id)
                 elif action.type == 'signed':
                     msg = '%s was signed by the President' % format_billid(action.bill_id)
+                    tags = {'or': [tags, '/bill/signed']}
 
                 notification = self.db.Notification()
                 notification.type = '/bill/action'
                 notification.message = msg
-                notification.tags = {'and': ['/bill/action', '/bills/%s' % action.bill_id]}
+                notification.tags = tags
                 notification.payload = {
                     'app_url': '/bills/%s/activity' % action.bill_id,
                     'vote': action.roll_id,
