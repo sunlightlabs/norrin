@@ -44,6 +44,7 @@
 		    		<p><strong>Fatal:</strong> Errors prevented the notification from being sent.</p>
 		    	</div>
 		    {% elif notification.sent %}
+		    	<a href="#" class="btn btn-xs btn-primary send-trigger" style="float: right;">Resend now</a>
 		    	<div class="alert alert-success"><strong>Success:</strong> Notification has been sent.</div>
 		    {% else %}
 		    	<div class="alert alert-info">

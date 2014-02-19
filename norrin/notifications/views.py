@@ -80,6 +80,7 @@ class SendView(View):
 
     def post(self, request, *args, **kwargs):
         notification = db.Notification.find_one({'id': kwargs.get('notification_id')})
-        if notification and not notification.sent:
+        # if notification and not notification.sent:
+        if notification:
             Service().push_notification(notification)
         return HttpResponse('{}', content_type='application/json')
