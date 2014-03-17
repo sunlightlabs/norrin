@@ -58,8 +58,9 @@ class ConfigurationView(View):
             except Client.DoesNotExist:
                 pass
 
-        # ua = request.META.get('HTTP_USER_AGENT', '')
-        # Load.objects.create(configuration=config, client=client, user_agent=ua)
+        if client:
+            ua = request.META.get('HTTP_USER_AGENT', '')
+            Load.objects.create(configuration=config, client=client, user_agent=ua)
 
         # return the response
 
