@@ -314,17 +314,19 @@ class UpcomingBillService(Service):
 
     def send_notifications(self):
         today = datetime.datetime.combine(datetime.date.today(), datetime.time(0, 0, 0, 0))
-        bills = list(self.db.UpcomingBill.find({'processed': False, 'legislative_day': today}))
+        bills = list(self.db.UpcomingBill.find({'processed': False}))
 
         for bill in bills:
 
             bill_id = format_billid(bill.bill_id)
             chamber = bill.chamber.title()
 
+            legislative_day = bill.legislative_day.strftime('%A, %B %-d')
+
             if bill['range'] == 'day':
-                msg = '%s is scheduled for a vote today in the %s' % (bill_id, chamber)
+                msg = '%s is scheduled for a vote on %s in the %s' % (bill_id, legislative_day, chamber)
             elif bill['range'] == 'week':
-                msg = '%s is scheduled for a vote this week in the %s' % (bill_id, chamber)
+                msg = '%s is scheduled for a vote the week of %s in the %s' % (bill_id, legislative_day, chamber)
             else:
                 msg = '%s is scheduled for a vote in the %s' % (bill_id, chamber)
 
