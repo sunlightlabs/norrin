@@ -13,6 +13,7 @@ humanize==0.5
 jsonfield==0.9.20
 kombu==3.0.9
 mongokit==0.9.0
+nose==1.3.3
 psycopg2==2.5.2
 pymongo==2.6.3
 python-dateutil==2.2
