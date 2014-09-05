@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+    <channel>
+        <title>Norrin Notifications</title>
+        <description>Notifications sent through Norrin</description>
+        <link>http://norrin.cngr.es/notifications/rss/</link>
+        <pubDate>{% now "r" %}</pubDate>
+        <ttl>30</ttl>
+        {% for notification in notifications %}
+            <item>
+                <title>{{ notification.message }}</title>
+                <description>{% if notification.errors %}!!! NOTIFICATION CONTAINS ERRORS !!! {% endif %}{{ notification.type }} notification sent at {{ notification.timestamp }}.</description>
+                <link>{% url 'notification_detail' notification.id %}</link>
+                <guid>{{ notification.id }}</guid>
+                <pubDate>{{ notification.timestamp|date:"r" }}</pubDate>
+            </item>
+        {% endfor %}
+    </channel>
+</rss>

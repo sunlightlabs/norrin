@@ -84,3 +84,11 @@ class SendView(View):
         if notification:
             Service().push_notification(notification)
         return HttpResponse('{}', content_type='application/json')
+
+
+class RSSView(View):
+
+    def get(self, request, *args, **kwargs):
+        notifications = db.Notification.find({}).sort('timestamp', -1).limit(30)
+        context = {'notifications': notifications}
+        return render(request, 'notifications/feed.rss', context, content_type='application/rss+xml')
