@@ -97,6 +97,7 @@ STATIC_URL = '/static/'
 # authentication
 
 GOOGLEAUTH_APPS_DOMAIN = 'sunlightfoundation.com'
+GOOGLEAUTH_USE_HTTPS = False
 GOOGLEAUTH_IS_STAFF = True
 
 GOOGLEAUTH_CLIENT_ID = os.environ.get('GOOGLEAUTH_CLIENT_ID')
