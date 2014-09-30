@@ -96,7 +96,12 @@ STATIC_URL = '/static/'
 
 # authentication
 
-GOOGLEAUTH_DOMAIN = 'sunlightfoundation.com'
+GOOGLEAUTH_APPS_DOMAIN = 'sunlightfoundation.com'
+GOOGLEAUTH_IS_STAFF = True
+
+GOOGLEAUTH_CLIENT_ID = os.environ.get('GOOGLEAUTH_CLIENT_ID')
+GOOGLEAUTH_CLIENT_SECRET = os.environ.get('GOOGLEAUTH_CLIENT_SECRET')
+GOOGLEAUTH_CALLBACK_DOMAIN = 'norrin.cngr.es'
 
 LOGIN_URL = '/login/'
 LOGOUT_URL = '/logout/'
