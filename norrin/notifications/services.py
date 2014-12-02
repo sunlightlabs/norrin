@@ -12,12 +12,17 @@ from sunlight import congress
 from sunlight.pagination import PagingService
 from raven import Client as Raven
 
+
 from .models import connection
 from norrin import settings
 from norrin.util import day_before, yesterday, format_billid
 
 logger = logging.getLogger('norrin.notifications')
 airship = ua.Airship(settings.UA_KEY, settings.UA_MASTER)
+
+# terrible, terrible hack because of no sslv3
+import sunlight.services.congress
+sunlight.services.congress.API_ROOT = 'http://congress.api.sunlightfoundation.com'
 
 congress = PagingService(congress)
 
