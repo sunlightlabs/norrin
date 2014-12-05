@@ -114,6 +114,7 @@ class Notification(Document):
         'payload': dict,
         'meta': dict,
         'scheduled_for': datetime,
+        'local_scheduled_for': datetime,
         'timestamp': datetime,
         'sent': bool,
         'errors': list,

@@ -6,6 +6,10 @@ from norrin import config
 logger = logging.getLogger('norrin.notifications.adapters')
 
 
+def local_scheduled_time(timestamp):
+    return {'local_scheduled_time': timestamp.strftime('%Y-%m-%dT%H:%M:%S')}
+
+
 class UrbanAirshipAdapter(object):
 
     def __init__(self, airship):
@@ -27,9 +31,17 @@ class UrbanAirshipAdapter(object):
             schedule.push = push
             schedule.name = notification.type
             schedule.schedule = ua.scheduled_time(notification.scheduled_for)
+            logger.info("Sending scheduled push to Urban Airship")
+            resp = schedule.send()
+        elif notification.local_scheduled_for:
+            schedule = self.airship.create_scheduled_push()
+            schedule.push = push
+            schedule.name = notification.type
+            schedule.schedule = local_scheduled_time(notification.local_scheduled_for)
+            logger.info("Sending local scheduled push to Urban Airship")
             resp = schedule.send()
         else:
-            logger.info("Pushing to Urban Airship")
+            logger.info("Sending push to Urban Airship")
             resp = push.send()
 
         notification.meta['ua_response'] = resp.payload
