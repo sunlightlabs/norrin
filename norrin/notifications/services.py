@@ -14,6 +14,7 @@ from raven import Client as Raven
 
 
 from .models import connection
+from .schedule import delay_until_local
 from norrin import settings
 from norrin.util import day_before, yesterday, format_billid
 
@@ -168,6 +169,11 @@ class BillService(Service):
                 'type': notification.type,
                 'legislator': sponsor_id,
             }
+
+            local_dt = delay_until_local()
+            if local_dt:
+                notification.scheduled_for = local_dt
+                notification.scheduled_for_local = True
 
             if bill_count == 1:
                 notification.payload['app_url'] = '/bills/%s' % bills[0]['bill_id']
@@ -349,6 +355,11 @@ class UpcomingBillService(Service):
                 'bill': bill.bill_id,
                 'legislative_day': today.date().isoformat(),
             }
+
+            local_dt = delay_until_local()
+            if local_dt:
+                notification.scheduled_for = local_dt
+                notification.scheduled_for_local = True
 
             self.push_notification(notification)
 

@@ -27,19 +27,19 @@ class UrbanAirshipAdapter(object):
         push.device_types = ua.device_types('ios')
 
         if notification.scheduled_for:
+
             schedule = self.airship.create_scheduled_push()
             schedule.push = push
             schedule.name = notification.type
-            schedule.schedule = ua.scheduled_time(notification.scheduled_for)
+
+            if notification.scheduled_for_local:
+                schedule.schedule = local_scheduled_time(notification.scheduled_for)
+            else:
+                schedule.schedule = ua.scheduled_time(notification.scheduled_for)
+
             logger.info("Sending scheduled push to Urban Airship")
             resp = schedule.send()
-        elif notification.local_scheduled_for:
-            schedule = self.airship.create_scheduled_push()
-            schedule.push = push
-            schedule.name = notification.type
-            schedule.schedule = local_scheduled_time(notification.local_scheduled_for)
-            logger.info("Sending local scheduled push to Urban Airship")
-            resp = schedule.send()
+
         else:
             logger.info("Sending push to Urban Airship")
             resp = push.send()

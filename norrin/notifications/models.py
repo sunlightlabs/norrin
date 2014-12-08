@@ -114,11 +114,17 @@ class Notification(Document):
         'payload': dict,
         'meta': dict,
         'scheduled_for': datetime,
-        'local_scheduled_for': datetime,
+        'scheduled_for_local': bool,
         'timestamp': datetime,
         'sent': bool,
         'errors': list,
     }
     required_fields = ['id', 'type', 'message', 'timestamp']
-    default_values = {'id': new_id, 'sent': False, 'errors': list, 'timestamp': datetime.utcnow}
+    default_values = {
+        'id': new_id,
+        'sent': False,
+        'errors': list,
+        'timestamp': datetime.utcnow,
+        'scheduled_for_local': False,
+    }
     use_dot_notation = True
